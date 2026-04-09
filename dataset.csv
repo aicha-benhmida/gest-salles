@@ -1,0 +1,435 @@
+text,category
+porte abimée,Mobilier
+chaise cassée,Mobilier
+table abimée,Mobilier
+bureau cassé,Mobilier
+porte bloquée,Mobilier
+fenetre cassée,Mobilier
+mobilier abimé,Mobilier
+chaise en panne,Mobilier
+table boiteuse,Mobilier
+porte ne ferme plus,Mobilier
+fenetre ne ferme plus,Mobilier
+probleme chaise,Mobilier
+probleme table,Mobilier
+probleme bureau,Mobilier
+probleme fenetre,Mobilier
+probleme porte,Mobilier
+porte cassee,Mobilier
+fenetre cassee,Mobilier
+chaise abimee,Mobilier
+bureau abime,Mobilier
+problem porte fenetre,Mobilier
+porte cassée,Mobilier
+fenêtre bloquée,Mobilier
+porte ne ferme pas,Mobilier
+fenetre ne s'ouvre pas,Mobilier
+problème de caméra,Mobilier
+caméra ne fonctionne pas,Mobilier
+caméra cassée,Mobilier
+problème électricité,Electricite
+electricité ne marche pas,Electricite
+prise électrique cassée,Electricite
+court circuit,Electricite
+Le projecteur ne s'allume pas,Projecteur
+problem de projecteur,Projecteur
+probleme projecteur,Projecteur
+probleme avec le projecteur,Projecteur
+projecteur marche pas,Projecteur
+projecteur en panne,Projecteur
+souci projecteur,Projecteur
+bug projecteur,Projecteur
+projecteur défectueux,Projecteur
+problème vidéoprojecteur,Projecteur
+beamer en panne,Projecteur
+L'image du vidéoprojecteur est floue,Projecteur
+Le projecteur affiche écran noir,Projecteur
+Le câble HDMI du projecteur est cassé,Projecteur
+Le projecteur fait du bruit anormal,Projecteur
+Impossible de connecter l'ordinateur au projecteur,Projecteur
+Le projecteur s'éteint tout seul,Projecteur
+La télécommande du projecteur ne fonctionne pas,Projecteur
+La lampe du projecteur est grillée,Projecteur
+Le projecteur ne projette aucune image,Projecteur
+L'écran de projection est endommagé,Projecteur
+Le projecteur surchauffe rapidement,Projecteur
+L'image du projecteur clignote,Projecteur
+Le support du projecteur est instable,Projecteur
+Le projecteur ne détecte pas le signal HDMI,Projecteur
+La qualité d'image du projecteur est mauvaise,Projecteur
+Le projecteur affiche des lignes sur l'écran,Projecteur
+Le projecteur ne répond pas aux commandes,Projecteur
+Le projecteur ne démarre plus,Projecteur
+Le bouton d'alimentation du projecteur est bloqué,Projecteur
+La climatisation ne refroidit plus,Climatisation
+La clim fait beaucoup de bruit,Climatisation
+L'air ne sort plus de la climatisation,Climatisation
+La climatisation fuit de l'eau,Climatisation
+La climatisation ne s'allume pas,Climatisation
+La température de la salle est trop élevée,Climatisation
+La climatisation dégage une mauvaise odeur,Climatisation
+La clim ne répond pas à la télécommande,Climatisation
+La climatisation s'éteint toute seule,Climatisation
+La ventilation ne fonctionne pas correctement,Climatisation
+La climatisation ne chauffe pas,Climatisation
+Le panneau de contrôle de la clim est cassé,Climatisation
+La climatisation fait un bruit étrange,Climatisation
+L'unité de climatisation est bloquée,Climatisation
+La climatisation consomme trop d'énergie,Climatisation
+L'air conditionné ne fonctionne plus,Climatisation
+La climatisation ne maintient pas la température,Climatisation
+Le filtre de la clim est sale,Climatisation
+La climatisation démarre difficilement,Climatisation
+La climatisation ne souffle plus d'air,Climatisation
+Les lumières ne fonctionnent pas,Electricite
+Les prises électriques sont en panne,Electricite
+Il n'y a plus d'électricité dans la salle,Electricite
+Les lampes clignotent,Electricite
+Une prise électrique est cassée,Electricite
+Le tableau électrique fait du bruit,Electricite
+Les interrupteurs ne répondent pas,Electricite
+La lumière est trop faible,Electricite
+Une ampoule est grillée,Electricite
+Les câbles électriques sont endommagés,Electricite
+Le courant saute régulièrement,Electricite
+Il y a une coupure d'électricité,Electricite
+Le disjoncteur est déclenché,Electricite
+La salle n'a plus d'éclairage,Electricite
+Une prise dégage des étincelles,Electricite
+Les néons ne s'allument pas,Electricite
+L'installation électrique semble défectueuse,Electricite
+Le système d'éclairage est instable,Electricite
+Les lampes font un bruit étrange,Electricite
+Les fils électriques sont exposés,Electricite
+Les chaises sont cassées,Mobilier
+La table est instable,Mobilier
+Les bureaux sont endommagés,Mobilier
+Plusieurs chaises sont cassées,Mobilier
+Un bureau est fissuré,Mobilier
+Les tables sont rayées,Mobilier
+Une chaise est manquante,Mobilier
+Le mobilier est mal fixé,Mobilier
+Les pieds des tables sont cassés,Mobilier
+Une chaise est instable,Mobilier
+Les tiroirs du bureau ne s'ouvrent plus,Mobilier
+Une table est bancale,Mobilier
+Les armoires sont endommagées,Mobilier
+Le mobilier est usé,Mobilier
+Une chaise est bruyante,Mobilier
+Les tables sont mal alignées,Mobilier
+Le bureau est trop petit,Mobilier
+Les chaises sont inconfortables,Mobilier
+Le tableau blanc est abîmé,Mobilier
+Les bancs sont fissurés,Mobilier
+Le wifi ne marche pas,Internet
+La connexion internet est lente,Internet
+Impossible de se connecter au réseau,Internet
+Le réseau wifi est indisponible,Internet
+Internet se coupe fréquemment,Internet
+Le signal wifi est faible,Internet
+La connexion est instable,Internet
+Le mot de passe wifi ne fonctionne pas,Internet
+Le routeur semble éteint,Internet
+Le réseau est saturé,Internet
+La page web ne charge pas,Internet
+La connexion internet est interrompue,Internet
+Le point d'accès wifi est défectueux,Internet
+Impossible d'accéder à internet,Internet
+Le réseau ne détecte aucun appareil,Internet
+La bande passante est insuffisante,Internet
+Le wifi est trop lent pendant les cours,Internet
+Le serveur réseau ne répond pas,Internet
+Le signal internet disparaît souvent,Internet
+Le système réseau est en panne,Internet
+Le wifi ne fonctionne pas,Internet
+La connexion internet est lente,Internet
+Impossible de se connecter au réseau,Internet
+Le réseau est coupé,Internet
+La borne wifi est en panne,Internet
+Pas d'accès internet en salle,Internet
+Le débit internet est très faible,Internet
+La connexion wifi est instable,Internet
+Le signal wifi est très faible,Internet
+Internet ne marche pas depuis ce matin,Internet
+Je n'arrive pas à me connecter au wifi,Internet
+Le réseau wifi est introuvable,Internet
+La connexion est très lente aujourd'hui,Internet
+Le wifi se déconnecte tout seul,Internet
+Pas de signal internet en salle 3,Internet
+Le réseau est saturé,Internet
+La connexion internet est coupée,Internet
+Impossible d'accéder aux sites web,Internet
+Le wifi fonctionne mal depuis hier,Internet
+La borne wifi ne diffuse plus,Internet
+Internet est très lent en salle 5,Internet
+Le réseau ne répond pas,Internet
+La connexion tombe souvent,Internet
+Le wifi est inaccessible,Internet
+Pas de connexion dans le couloir,Internet
+Le réseau est hors service,Internet
+La vitesse internet est insuffisante,Internet
+Le wifi ne s'affiche pas sur mon PC,Internet
+Impossible de charger les pages web,Internet
+La connexion internet est intermittente,Internet
+Le réseau wifi est très lent,Internet
+Je perds souvent la connexion wifi,Internet
+Le wifi ne marche pas en amphi,Internet
+Pas d'internet depuis 2 heures,Internet
+La connexion est bloquée,Internet
+Le réseau est inaccessible en salle 7,Internet
+Le wifi est coupé depuis ce matin,Internet
+Je ne peux pas accéder à internet,Internet
+La connexion réseau est très mauvaise,Internet
+Le signal wifi est inexistant ici,Internet
+Internet est hors service,Internet
+Le wifi ne capte pas en salle 2,Internet
+La connexion internet plante souvent,Internet
+Le réseau wifi est saturé,Internet
+Pas de connexion internet disponible,Internet
+Le wifi est très instable,Internet
+Je n'ai pas accès au réseau,Internet
+La connexion internet est bloquée,Internet
+Le wifi ne fonctionne plus depuis hier,Internet
+Pas de réseau wifi détecté,Internet
+Internet est trop lent pour travailler,Internet
+La borne wifi est hors service,Internet
+Le réseau coupe toutes les 5 minutes,Internet
+Le wifi ne répond pas,Internet
+La connexion est très mauvaise,Internet
+Impossible de rester connecté au wifi,Internet
+Le réseau internet est en panne totale,Internet
+Le wifi est bloqué en salle 4,Internet
+Pas de connexion réseau disponible,Internet
+La connexion wifi est très instable,Internet
+La lumière est éteinte en salle,Electricite
+La prise électrique ne marche pas,Electricite
+Il n'y a pas d'électricité,Electricite
+Les néons sont cassés,Electricite
+La prise est en panne,Electricite
+Le disjoncteur a sauté,Electricite
+L'ampoule est grillée,Electricite
+Pas de courant en salle 3,Electricite
+La lumière clignote sans arrêt,Electricite
+Les lampes ne s'allument pas,Electricite
+La prise murale est défectueuse,Electricite
+Il y a une coupure de courant,Electricite
+La salle est plongée dans le noir,Electricite
+Les lumières sont éteintes,Electricite
+La prise ne fonctionne plus,Electricite
+Le tableau électrique est en panne,Electricite
+L'éclairage est insuffisant,Electricite
+Les néons clignotent,Electricite
+Pas d'électricité depuis ce matin,Electricite
+La prise est brûlée,Electricite
+Le courant est coupé en salle 6,Electricite
+L'ampoule a sauté,Electricite
+La lumière ne marche plus,Electricite
+Le disjoncteur saute souvent,Electricite
+Pas de lumière dans le couloir,Electricite
+La prise électrique fait des étincelles,Electricite
+L'installation électrique est défaillante,Electricite
+Le courant est instable,Electricite
+Les prises sont toutes en panne,Electricite
+La lumière est trop faible,Electricite
+Il n'y a pas d'éclairage,Electricite
+La prise ne donne pas de courant,Electricite
+Les lampes sont grillées,Electricite
+Le circuit électrique est en panne,Electricite
+Pas de courant dans la prise,Electricite
+L'éclairage de la salle est cassé,Electricite
+La lumière s'éteint toute seule,Electricite
+Les néons sont défectueux,Electricite
+La prise USB ne charge pas,Electricite
+Le courant saute régulièrement,Electricite
+Il n'y a plus d'électricité en salle,Electricite
+La lumière vacille en salle 2,Electricite
+Les ampoules sont toutes grillées,Electricite
+La prise est hors service,Electricite
+Le courant est très instable,Electricite
+Pas d'alimentation électrique,Electricite
+L'éclairage est en panne totale,Electricite
+Le disjoncteur ne se remet pas,Electricite
+La salle manque de lumière,Electricite
+Les prises ne fonctionnent plus,Electricite
+La lumière est défaillante en salle 8,Electricite
+Le courant ne passe plus,Electricite
+Les néons font du bruit,Electricite
+La prise électrique est cassée,Electricite
+Il y a une panne électrique générale,Electricite
+L'ampoule de la salle est cassée,Electricite
+Le projecteur ne s'allume pas,Projecteur
+Le vidéoprojecteur est en panne,Projecteur
+L'écran de projection est cassé,Projecteur
+Le beamer ne fonctionne pas,Projecteur
+Le projecteur affiche une image floue,Projecteur
+Le câble HDMI du projecteur est cassé,Projecteur
+Le projecteur s'éteint tout seul,Projecteur
+Impossible d'allumer le projecteur,Projecteur
+Le projecteur ne projette rien,Projecteur
+L'image du projecteur est déformée,Projecteur
+Le projecteur chauffe trop,Projecteur
+Le vidéoprojecteur affiche du noir,Projecteur
+Le projecteur fait du bruit,Projecteur
+Pas d'image sur le projecteur,Projecteur
+Le projecteur ne détecte pas le PC,Projecteur
+L'écran blanc est déchiré,Projecteur
+Le projecteur clignote,Projecteur
+La télécommande du projecteur est cassée,Projecteur
+Le projecteur ne répond plus,Projecteur
+L'affichage du projecteur est décalé,Projecteur
+Le vidéoprojecteur grésille,Projecteur
+Le projecteur n'affiche pas les couleurs,Projecteur
+Impossible de connecter le PC au projecteur,Projecteur
+Le câble VGA du projecteur est perdu,Projecteur
+Le projecteur est trop sombre,Projecteur
+L'image projetée est trop petite,Projecteur
+Le projecteur s'arrête au bout de 5 min,Projecteur
+Le vidéoprojecteur ne démarre pas,Projecteur
+Le projecteur est hors service,Projecteur
+L'écran de projection est sale,Projecteur
+Le projecteur affiche une erreur,Projecteur
+Le vidéoprojecteur ne reconnait pas le HDMI,Projecteur
+Le projecteur ne marche plus,Projecteur
+L'image du projecteur est trop floue,Projecteur
+Le projecteur ne s'éteint pas,Projecteur
+Le beamer affiche du blanc,Projecteur
+Le projecteur a une ligne sur l'image,Projecteur
+Le vidéoprojecteur surchauffe,Projecteur
+Pas de son sur le projecteur,Projecteur
+L'écran de projection est tombé,Projecteur
+Le projecteur ne projette plus depuis hier,Projecteur
+Le vidéoprojecteur est bloqué,Projecteur
+Le câble du projecteur est abîmé,Projecteur
+L'image projetée est inversée,Projecteur
+Le projecteur est trop lumineux,Projecteur
+Le vidéoprojecteur ne se connecte pas,Projecteur
+Le projecteur est en panne depuis lundi,Projecteur
+L'image du beamer est décalée,Projecteur
+Le projecteur affiche une image noire,Projecteur
+Le vidéoprojecteur s'éteint seul,Projecteur
+Le projecteur ne capte pas le signal,Projecteur
+Le projecteur clignote en permanence,Projecteur
+Le beamer ne projette rien du tout,Projecteur
+Le projecteur fait un bruit étrange,Projecteur
+L'écran de projection ne descend pas,Projecteur
+Le vidéoprojecteur est défectueux,Projecteur
+Le projecteur ne marche plus du tout,Projecteur
+La climatisation ne marche pas,Climatisation
+Il fait très chaud dans la salle,Climatisation
+La clim est en panne,Climatisation
+Le chauffage ne fonctionne pas,Climatisation
+La température est insupportable,Climatisation
+La clim fait du bruit,Climatisation
+Le ventilateur est cassé,Climatisation
+Il n'y a pas d'aération en salle,Climatisation
+La salle est étouffante,Climatisation
+Le système de climatisation est en panne,Climatisation
+La clim souffle de l'air chaud,Climatisation
+Il fait trop froid en salle,Climatisation
+La climatisation ne refroidit pas,Climatisation
+Le chauffage est trop fort,Climatisation
+La clim ne s'allume pas,Climatisation
+Il fait une chaleur insupportable,Climatisation
+Le ventilateur de la salle est cassé,Climatisation
+La climatisation est hors service,Climatisation
+La salle est mal ventilée,Climatisation
+La clim fuit de l'eau,Climatisation
+Le chauffage est insuffisant en hiver,Climatisation
+La climatisation fait un bruit fort,Climatisation
+Il fait trop chaud pour travailler,Climatisation
+La clim s'éteint toute seule,Climatisation
+Le système de ventilation est bloqué,Climatisation
+La température de la salle est trop élevée,Climatisation
+La clim ne régule pas la température,Climatisation
+Le chauffage est en panne depuis hier,Climatisation
+La salle est trop chaude,Climatisation
+La climatisation coule,Climatisation
+Le ventilateur tourne mais ne refroidit pas,Climatisation
+La clim sent mauvais,Climatisation
+Il n'y a pas de chauffage en hiver,Climatisation
+La climatisation souffle trop fort,Climatisation
+Le thermostat de la clim est cassé,Climatisation
+La salle est glaciale,Climatisation
+La clim fait beaucoup de bruit,Climatisation
+Le chauffage central est en panne,Climatisation
+La ventilation de la salle est insuffisante,Climatisation
+La clim ne répond plus à la télécommande,Climatisation
+Il fait trop froid dans le couloir,Climatisation
+La climatisation est défaillante,Climatisation
+Le ventilateur de plafond est cassé,Climatisation
+La clim s'arrête toutes les 10 minutes,Climatisation
+Il n'y a pas de ventilation,Climatisation
+La température est inconfortable,Climatisation
+Le chauffage ne chauffe pas assez,Climatisation
+La clim donne de l'air froid en hiver,Climatisation
+La salle sent le renfermé,Climatisation
+Le système de chauffage est défectueux,Climatisation
+La clim ne marche que parfois,Climatisation
+Le ventilateur fait du bruit,Climatisation
+La climatisation est trop froide,Climatisation
+Il fait une chaleur horrible en salle,Climatisation
+La clim ne filtre pas l'air,Climatisation
+Le chauffage fume,Climatisation
+La climatisation est bloquée en mode froid,Climatisation
+La salle n'est pas climatisée,Climatisation
+Le ventilateur de la clim est bloqué,Climatisation
+La chaise est cassée,Mobilier
+Le bureau est abîmé,Mobilier
+La table est instable,Mobilier
+La porte ne ferme pas,Mobilier
+Le tableau est sale,Mobilier
+La fenêtre est cassée,Mobilier
+Les chaises manquent en salle,Mobilier
+Le mobilier est en mauvais état,Mobilier
+La chaise est bancale,Mobilier
+Le bureau est rayé,Mobilier
+La table est cassée,Mobilier
+La porte est bloquée,Mobilier
+Le tableau blanc est inutilisable,Mobilier
+La vitre est fissurée,Mobilier
+Il manque des chaises en salle,Mobilier
+Le pupitre est cassé,Mobilier
+La chaise du professeur est abîmée,Mobilier
+Le bureau ne tient pas bien,Mobilier
+La table a une patte cassée,Mobilier
+La porte grince beaucoup,Mobilier
+Le tableau noir est effacé et inutile,Mobilier
+La fenêtre ne s'ouvre pas,Mobilier
+Les tables sont insuffisantes,Mobilier
+Le mobilier de la salle est vieux,Mobilier
+La chaise est dangereuse,Mobilier
+Le bureau est trop petit,Mobilier
+La table est tachée,Mobilier
+La porte est décrochée,Mobilier
+Le tableau est illisible,Mobilier
+La fenêtre laisse passer le froid,Mobilier
+Il n'y a pas assez de tables,Mobilier
+Le pupitre est branlant,Mobilier
+La chaise manque d'un pied,Mobilier
+Le bureau est taggué,Mobilier
+La table est trop basse,Mobilier
+La porte ne s'ouvre plus,Mobilier
+Le tableau est fissuré,Mobilier
+La fenêtre est voilée,Mobilier
+Les chaises sont inconfortables,Mobilier
+Le mobilier est insuffisant,Mobilier
+La chaise est brisée,Mobilier
+Le bureau est instable,Mobilier
+La table tremble,Mobilier
+La porte est coincée,Mobilier
+Le tableau ne tient pas au mur,Mobilier
+La fenêtre est brisée,Mobilier
+Il manque des bureaux,Mobilier
+Le pupitre est trop haut,Mobilier
+La chaise grince,Mobilier
+Le bureau est trop vieux,Mobilier
+La table est en mauvais état,Mobilier
+La porte claque fort,Mobilier
+Le tableau est décroché,Mobilier
+La fenêtre ne ferme plus,Mobilier
+Les tables sont abîmées,Mobilier
+Le mobilier est dégradé,Mobilier
+La chaise n'a plus de dossier,Mobilier
+Le bureau est cassé,Mobilier
+La table est dangereuse,Mobilier
+La porte est hors service,Mobilier

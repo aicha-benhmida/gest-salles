@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Présences – ISIMM Rooms</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link rel="stylesheet" href="style.css" />
+  <script src="app.js"></script>
+  <style>
+    /* ── Page tabs ── */
+    .presence-tabs {
+      display:flex; gap:4px; background:#fff;
+      border:1.5px solid var(--gray-border); border-radius:14px;
+      padding:5px; margin-bottom:24px; width:fit-content;
+    }
+    .presence-tab-btn {
+      padding:9px 22px; border-radius:10px; border:none;
+      font-family:'Poppins',sans-serif; font-size:.85rem; font-weight:600;
+      cursor:pointer; color:var(--gray-text); background:transparent;
+      display:flex; align-items:center; gap:7px; transition:all .18s; white-space:nowrap;
+    }
+    .presence-tab-btn:hover:not(.active) { background:var(--gray-bg); color:var(--text-dark); }
+    .presence-tab-btn.active { background:var(--blue-mid); color:#fff; }
+    .presence-panel { display:none; }
+    .presence-panel.active { display:block; }
+
+    /* ── Accordion tree ── */
+    .tree-root { display:flex; flex-direction:column; gap:8px; }
+    .grade-row { background:#fff; border:1.5px solid var(--gray-border); border-radius:14px; overflow:hidden; }
+    .grade-header { display:flex; align-items:center; justify-content:space-between; padding:16px 20px; cursor:pointer; user-select:none; background:linear-gradient(135deg,var(--blue-soft) 0%,#fff 100%); transition:background .15s; }
+    .grade-header:hover { background:var(--blue-soft); }
+    .grade-header.open { border-bottom:1.5px solid var(--gray-border); }
+    .grade-title { display:flex; align-items:center; gap:12px; font-weight:700; font-size:.95rem; color:var(--text-dark); }
+    .grade-icon { width:38px; height:38px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:1rem; flex-shrink:0; }
+    .grade-count { font-size:.75rem; font-weight:600; color:var(--gray-text); background:var(--gray-border); padding:2px 10px; border-radius:20px; }
+    .grade-chevron { color:var(--gray-text); transition:transform .2s; font-size:.85rem; }
+    .grade-chevron.open { transform:rotate(180deg); }
+    .niveau-list { padding:8px; display:none; flex-direction:column; gap:4px; background:var(--gray-bg); }
+    .niveau-list.open { display:flex; }
+    .niveau-row { background:#fff; border:1px solid var(--gray-border); border-radius:10px; overflow:hidden; }
+    .niveau-header { display:flex; align-items:center; justify-content:space-between; padding:12px 16px; cursor:pointer; user-select:none; transition:background .15s; }
+    .niveau-header:hover { background:var(--blue-soft); }
+    .niveau-header.open { border-bottom:1px solid var(--gray-border); background:var(--blue-soft); }
+    .niveau-title { display:flex; align-items:center; gap:10px; font-weight:600; font-size:.88rem; color:var(--text-dark); }
+    .niveau-badge { padding:2px 8px; border-radius:6px; font-size:.68rem; font-weight:700; background:var(--blue-tint); color:var(--blue-mid); }
+    .classe-list { padding:8px; display:none; flex-direction:column; gap:4px; }
+    .classe-list.open { display:flex; }
+    .classe-row { display:flex; align-items:center; justify-content:space-between; padding:11px 16px; border-radius:8px; cursor:pointer; border:1px solid transparent; transition:all .15s; background:#fafbff; }
+    .classe-row:hover { background:var(--blue-soft); border-color:var(--blue-border); }
+    .classe-row.active { background:var(--blue-mid); color:#fff; border-color:var(--blue-mid); }
+    .classe-row.active .classe-sub { color:rgba(255,255,255,.7); }
+    .classe-row.active .classe-cap { background:rgba(255,255,255,.25); color:#fff; }
+    .classe-name { font-weight:600; font-size:.85rem; }
+    .classe-sub { font-size:.72rem; color:var(--gray-text); margin-top:2px; }
+    .classe-cap { font-size:.75rem; font-weight:600; color:var(--gray-text); background:var(--gray-border); padding:2px 8px; border-radius:20px; flex-shrink:0; }
+
+    /* ── Students mark panel ── */
+    .students-panel { background:#fff; border-radius:16px; border:1.5px solid var(--gray-border); box-shadow:0 2px 12px rgba(0,0,0,0.06); overflow:hidden; }
+    .students-panel-header { padding:20px 24px; background:linear-gradient(135deg,var(--blue-soft),#fff); border-bottom:1px solid var(--gray-border); }
+    .presence-table { width:100%; border-collapse:collapse; }
+    .presence-table th { padding:11px 16px; text-align:left; font-size:.75rem; font-weight:700; color:var(--gray-text); text-transform:uppercase; letter-spacing:.5px; background:var(--gray-bg); border-bottom:1px solid var(--gray-border); }
+    .presence-table td { padding:12px 16px; font-size:.84rem; border-bottom:1px solid var(--gray-border); vertical-align:middle; }
+    .presence-table tr:last-child td { border-bottom:none; }
+    .presence-table tr:hover td { background:var(--blue-soft); }
+    .avatar-sm { width:34px; height:34px; border-radius:50%; flex-shrink:0; color:#fff; display:flex; align-items:center; justify-content:center; font-size:.78rem; font-weight:700; }
+    .presence-toggle { width:44px; height:24px; border-radius:12px; border:none; cursor:pointer; position:relative; transition:background .2s; flex-shrink:0; }
+    .presence-toggle::after { content:''; position:absolute; top:3px; left:3px; width:18px; height:18px; border-radius:50%; background:#fff; transition:transform .2s; box-shadow:0 1px 4px rgba(0,0,0,0.2); }
+    .presence-toggle.present { background:var(--green); }
+    .presence-toggle.present::after { transform:translateX(20px); }
+    .presence-toggle.absent { background:#d1d5db; }
+    .btn-save-presence { padding:10px 24px; background:var(--blue-mid); color:#fff; border:none; border-radius:10px; font-family:inherit; font-size:.88rem; font-weight:600; cursor:pointer; transition:all .15s; display:flex; align-items:center; gap:8px; }
+    .btn-save-presence:hover { background:var(--blue-dark); }
+    .btn-save-presence:disabled { opacity:.6; cursor:default; }
+    .select-all-bar { display:flex; align-items:center; gap:12px; padding:12px 16px; border-bottom:1px solid var(--gray-border); background:var(--gray-bg); flex-wrap:wrap; }
+    .select-all-bar button { padding:5px 14px; border-radius:8px; border:1.5px solid var(--gray-border); background:#fff; font-family:inherit; font-size:.78rem; font-weight:600; cursor:pointer; color:var(--text-dark); transition:all .15s; }
+    .select-all-bar button:hover { border-color:var(--blue-mid); color:var(--blue-mid); }
+    .presence-stats { display:flex; gap:12px; padding:16px 24px; border-top:1px solid var(--gray-border); background:var(--gray-bg); flex-wrap:wrap; }
+    .pstat { display:flex; align-items:center; gap:6px; font-size:.8rem; font-weight:600; }
+    .pstat-dot { width:10px; height:10px; border-radius:50%; }
+    .empty-select { padding:60px; text-align:center; color:var(--gray-text); }
+    .empty-select i { font-size:2.5rem; opacity:.25; display:block; margin-bottom:12px; }
+
+    /* ── Voir panel ── */
+    .voir-panel { background:#fff; border-radius:16px; border:1.5px solid var(--gray-border); box-shadow:0 2px 12px rgba(0,0,0,0.06); overflow:hidden; }
+    .voir-panel-header { padding:18px 24px; background:linear-gradient(135deg,var(--blue-soft),#fff); border-bottom:1px solid var(--gray-border); display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; }
+    .pres-badge { display:inline-flex; align-items:center; gap:5px; padding:5px 12px; border-radius:20px; font-size:.78rem; font-weight:700; }
+    .pres-badge.present { background:#dcfce7; color:#16a34a; }
+    .pres-badge.absent { background:#fee2e2; color:#ef4444; }
+    .summary-bar { display:flex; gap:10px; padding:14px 20px; border-bottom:1px solid var(--gray-border); background:var(--gray-bg); flex-wrap:wrap; align-items:center; }
+    .sbar-stat { display:flex; align-items:center; gap:6px; padding:6px 14px; border-radius:10px; font-size:.8rem; font-weight:700; }
+
+    /* ── Layouts ── */
+    .presence-layout { display:grid; grid-template-columns:360px 1fr; gap:20px; align-items:start; }
+    .voir-layout { display:grid; grid-template-columns:360px 1fr; gap:20px; align-items:start; }
+    @media(max-width:900px) { .presence-layout,.voir-layout { grid-template-columns:1fr; } }
+
+    /* ── Date bar ── */
+    .date-bar { display:flex; align-items:center; gap:12px; margin-bottom:24px; flex-wrap:wrap; }
+    .date-input-wrap { display:flex; align-items:center; gap:10px; background:#fff; border:1.5px solid var(--gray-border); border-radius:12px; padding:10px 16px; }
+    .date-input-wrap i { color:var(--blue-mid); }
+    .date-input-wrap input { border:none; outline:none; font-family:inherit; font-size:.88rem; font-weight:600; color:var(--text-dark); background:transparent; cursor:pointer; }
+    .date-hint { font-size:.82rem; color:var(--gray-text); padding:8px 14px; background:var(--blue-soft); border-radius:10px; border:1px solid var(--blue-border); }
+
+    .save-toast { position:fixed; bottom:80px; right:24px; z-index:9000; background:#1a1f36; color:#fff; padding:12px 20px; border-radius:12px; font-size:.85rem; font-weight:600; display:flex; align-items:center; gap:8px; box-shadow:0 4px 20px rgba(0,0,0,0.2); animation:toastIn .3s ease; }
+    @keyframes toastIn { from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)} }
+  </style>
+</head>
+<body class="dashboard-page">
+
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="logo">
+        <img src="logo_isimm.jpg" alt="ISIMM Logo" />
+        <div class="logo-text">
+          <span class="logo-title" id="logo-title">ISIMM Rooms</span>
+          <span class="logo-subtitle" id="logo-subtitle">Espace</span>
+        </div>
+      </div>
+    </div>
+    <nav class="sidebar-nav"><ul id="sidebar-nav-list"></ul></nav>
+    <div class="sidebar-footer">
+      <div class="user-profile" id="user-profile"></div>
+      <a href="login.html" class="logout-btn" onclick="sessionStorage.clear()">
+        <i class="fas fa-sign-out-alt"></i><span>Déconnexion</span>
+      </a>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <header class="header">
+      <div class="header-title">
+        <h1 id="page-h1">Gestion des <span>Présences</span></h1>
+        <p id="page-sub">Marquez et consultez les présences par classe</p>
+      </div>
+      <div class="header-actions">
+        <button class="notification-btn">
+          <i class="fas fa-bell"></i>
+          <span class="notification-badge" id="notif-count">0</span>
+        </button>
+        <button class="profile-btn"><i class="fas fa-user"></i></button>
+      </div>
+    </header>
+
+    <div class="content" id="main-content-area">
+      <div style="text-align:center;padding:60px;color:var(--gray-text);">
+        <i class="fas fa-spinner fa-spin" style="font-size:2rem;"></i>
+      </div>
+    </div>
+  </main>
+
+  <button class="help-btn" onclick="openHelpModal()"><i class="fas fa-question"></i></button>
+
+  <script>
+    let classesData   = [];
+    let selectedMarkId = null;
+    let selectedVoirId = null;
+    let studentsData  = {};
+    let presenceMap   = {};
+    let etudRows      = [];
+
+    const GRADE_COLORS = {
+      'Licence':    { bg:'#dbeafe', color:'#2952cc', icon:'fa-graduation-cap' },
+      'Master':     { bg:'#dcfce7', color:'#16a34a', icon:'fa-user-graduate'  },
+      'Ingénierie': { bg:'#fef3c7', color:'#d97706', icon:'fa-cogs'           },
+      'Cycle Prépa':{ bg:'#f3e8ff', color:'#7c3aed', icon:'fa-flask'          },
+    };
+
+    function esc(t){ if(!t)return''; return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+    function ini(p,n){ return ((p||'?')[0]+(n||'?')[0]).toUpperCase(); }
+    function today(){ return new Date().toISOString().slice(0,10); }
+    function fmtLong(dt){ if(!dt)return'—'; return new Date(dt+'T00:00:00').toLocaleDateString('fr-FR',{weekday:'long',day:'2-digit',month:'long',year:'numeric'}); }
+    function fmtShort(dt){ if(!dt)return'—'; return new Date(dt+'T00:00:00').toLocaleDateString('fr-FR',{weekday:'short',day:'2-digit',month:'short',year:'numeric'}); }
+
+    // ── INIT ─────────────────────────────────────────────
+    document.addEventListener('DOMContentLoaded', async () => {
+      const role = sessionStorage.getItem('user_role');
+      const area = document.getElementById('main-content-area');
+      if (role === 'etudiant') {
+        document.getElementById('page-h1').innerHTML = 'Ma <span>Présence</span>';
+        document.getElementById('page-sub').textContent = 'Consultez votre historique de présence';
+        area.innerHTML = etudiantHTML();
+        document.getElementById('etud-date').addEventListener('change', loadEtudPresence);
+        document.getElementById('etud-subject').addEventListener('input', renderEtudRows);
+        loadEtudPresence();
+      } else {
+        area.innerHTML = profAdminHTML();
+        document.getElementById('mark-date').value = today();
+        document.getElementById('voir-date').value = today();
+        document.getElementById('mark-date').addEventListener('change', () => { if(selectedMarkId) loadMarkStudents(selectedMarkId, true); });
+        document.getElementById('voir-date').addEventListener('change', () => { if(selectedVoirId) loadVoirStudents(selectedVoirId); });
+        await loadClasses();
+      }
+    });
+
+    // ── HTML TEMPLATES ────────────────────────────────────
+    function profAdminHTML() {
+      return `
+        <div class="presence-tabs">
+          <button class="presence-tab-btn active" id="tab-mark" onclick="switchTab('mark')">
+            <i class="fas fa-pen-to-square"></i> Marquer les présences
+          </button>
+          <button class="presence-tab-btn" id="tab-voir" onclick="switchTab('voir')">
+            <i class="fas fa-eye"></i> Voir les présences
+          </button>
+        </div>
+
+        <div class="presence-panel active" id="panel-mark">
+          <div class="date-bar">
+            <div class="date-input-wrap"><i class="fas fa-calendar-alt"></i><input type="date" id="mark-date" /></div>
+            <div class="date-hint"><i class="fas fa-info-circle" style="color:var(--blue-mid);margin-right:6px;"></i>Sélectionnez une classe puis marquez les présences</div>
+          </div>
+          <div class="presence-layout">
+            <div>
+              <div style="font-size:.8rem;font-weight:700;color:var(--gray-text);text-transform:uppercase;letter-spacing:.6px;margin-bottom:12px;">
+                <i class="fas fa-sitemap" style="margin-right:6px;"></i>Structure des classes
+              </div>
+              <div class="tree-root" id="mark-tree"><div style="text-align:center;padding:40px;color:var(--gray-text);"><i class="fas fa-spinner fa-spin" style="font-size:1.5rem;"></i></div></div>
+            </div>
+            <div class="students-panel" id="students-panel">
+              <div class="empty-select">
+                <i class="fas fa-mouse-pointer"></i>
+                <p style="font-weight:600;font-size:.95rem;color:var(--text-dark);margin-bottom:6px;">Aucune classe sélectionnée</p>
+                <p style="font-size:.82rem;">Cliquez sur une classe dans l'arborescence</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="presence-panel" id="panel-voir">
+          <div class="date-bar">
+            <div class="date-input-wrap"><i class="fas fa-calendar-alt"></i><input type="date" id="voir-date" /></div>
+            <div class="date-hint"><i class="fas fa-info-circle" style="color:var(--blue-mid);margin-right:6px;"></i>Sélectionnez une classe pour voir les présences du jour sélectionné</div>
+          </div>
+          <div class="voir-layout">
+            <div>
+              <div style="font-size:.8rem;font-weight:700;color:var(--gray-text);text-transform:uppercase;letter-spacing:.6px;margin-bottom:12px;">
+                <i class="fas fa-sitemap" style="margin-right:6px;"></i>Structure des classes
+              </div>
+              <div class="tree-root" id="voir-tree"><div style="text-align:center;padding:40px;color:var(--gray-text);"><i class="fas fa-spinner fa-spin" style="font-size:1.5rem;"></i></div></div>
+            </div>
+            <div class="voir-panel" id="voir-panel">
+              <div class="empty-select">
+                <i class="fas fa-chart-bar"></i>
+                <p style="font-weight:600;font-size:.95rem;color:var(--text-dark);margin-bottom:6px;">Aucune classe sélectionnée</p>
+                <p style="font-size:.82rem;">Cliquez sur une classe pour voir les présences</p>
+              </div>
+            </div>
+          </div>
+        </div>`;
+    }
+
+    function etudiantHTML() {
+      return `
+        <div class="date-bar">
+          <div class="date-input-wrap"><i class="fas fa-calendar-alt"></i><input type="date" id="etud-date" /></div>
+          <div style="display:flex;align-items:center;gap:8px;background:#fff;border:1.5px solid var(--gray-border);border-radius:12px;padding:10px 16px;flex:1;min-width:180px;">
+            <i class="fas fa-book" style="color:var(--blue-mid);"></i>
+            <input type="text" id="etud-subject" placeholder="Filtrer par classe / matière..." style="border:none;outline:none;font-family:inherit;font-size:.85rem;color:var(--text-dark);background:transparent;width:100%;" />
+          </div>
+        </div>
+        <div id="etud-stats" style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap;"></div>
+        <div style="background:#fff;border-radius:16px;border:1.5px solid var(--gray-border);overflow:hidden;">
+          <div style="padding:16px 20px;background:linear-gradient(135deg,var(--blue-soft),#fff);border-bottom:1px solid var(--gray-border);">
+            <h3 style="font-size:.95rem;font-weight:700;color:var(--text-dark);"><i class="fas fa-clipboard-list" style="color:var(--blue-mid);margin-right:8px;"></i>Historique de présence</h3>
+          </div>
+          <div id="etud-body"><div style="text-align:center;padding:60px;color:var(--gray-text);"><i class="fas fa-spinner fa-spin" style="font-size:1.5rem;"></i><p style="margin-top:12px;">Chargement...</p></div></div>
+        </div>`;
+    }
+
+    // ── TAB SWITCH ────────────────────────────────────────
+    function switchTab(tab) {
+      document.querySelectorAll('.presence-panel').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.presence-tab-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById('panel-'+tab).classList.add('active');
+      document.getElementById('tab-'+tab).classList.add('active');
+    }
+
+    // ── LOAD CLASSES → BUILD BOTH TREES ──────────────────
+    async function loadClasses() {
+      try {
+        const res  = await fetch('api.php?action=get_classes', { headers:{'X-User-Id':sessionStorage.getItem('user_id')||''} });
+        const data = await res.json();
+        if (data.success) {
+          classesData = data.classes;
+          buildTree('mark-tree', 'mark');
+          buildTree('voir-tree', 'voir');
+        }
+      } catch(e) {
+        document.getElementById('mark-tree').innerHTML = '<p style="color:red;padding:20px;">Erreur de chargement</p>';
+      }
+    }
+
+    function buildTree(containerId, mode) {
+      const tree = document.getElementById(containerId);
+      if (!classesData.length) { tree.innerHTML = '<p style="color:var(--gray-text);padding:20px;text-align:center;">Aucune classe</p>'; return; }
+      const byGrade = {};
+      classesData.forEach(c => {
+        if (!byGrade[c.grade]) byGrade[c.grade] = {};
+        if (!byGrade[c.grade][c.niveau]) byGrade[c.grade][c.niveau] = [];
+        byGrade[c.grade][c.niveau].push(c);
+      });
+      tree.innerHTML = '';
+      Object.entries(byGrade).forEach(([grade, niveaux]) => {
+        const gc  = GRADE_COLORS[grade] || { bg:'#f3f4f6', color:'#6b7280', icon:'fa-book' };
+        const tot = Object.values(niveaux).flat().length;
+        const el  = document.createElement('div');
+        el.className = 'grade-row';
+        el.innerHTML = `
+          <div class="grade-header" onclick="tGrade(this)">
+            <div class="grade-title">
+              <div class="grade-icon" style="background:${gc.bg};color:${gc.color};"><i class="fas ${gc.icon}"></i></div>
+              <span>${esc(grade)}</span>
+              <span class="grade-count">${tot} classe${tot>1?'s':''}</span>
+            </div>
+            <i class="fas fa-chevron-down grade-chevron"></i>
+          </div>
+          <div class="niveau-list">
+            ${Object.entries(niveaux).map(([niveau, classes]) => `
+              <div class="niveau-row">
+                <div class="niveau-header" onclick="tNiveau(this)">
+                  <div class="niveau-title"><span class="niveau-badge">${esc(niveau)}</span><span>${esc(grade)} – ${esc(niveau)}</span></div>
+                  <div style="display:flex;align-items:center;gap:8px;">
+                    <span style="font-size:.72rem;color:var(--gray-text);">${classes.length} groupe${classes.length>1?'s':''}</span>
+                    <i class="fas fa-chevron-down grade-chevron" style="font-size:.75rem;"></i>
+                  </div>
+                </div>
+                <div class="classe-list">
+                  ${classes.map(cl => `
+                    <div class="classe-row" id="${mode}-row-${cl.id_classe}" onclick="selectClasse(${cl.id_classe},this,'${mode}')">
+                      <div><div class="classe-name">${esc(cl.nom_classe)}</div><div class="classe-sub">${esc(cl.specialite)}</div></div>
+                      <span class="classe-cap"><i class="fas fa-users" style="margin-right:4px;"></i>${cl.capacite}</span>
+                    </div>`).join('')}
+                </div>
+              </div>`).join('')}
+          </div>`;
+        tree.appendChild(el);
+      });
+    }
+
+    function tGrade(h) { const l=h.nextElementSibling,c=h.querySelector('.grade-chevron'),o=l.classList.toggle('open'); h.classList.toggle('open',o); c.classList.toggle('open',o); }
+    function tNiveau(h) { const l=h.nextElementSibling,c=h.querySelector('.grade-chevron'),o=l.classList.toggle('open'); h.classList.toggle('open',o); c.classList.toggle('open',o); }
+
+    function selectClasse(id, rowEl, mode) {
+      document.querySelectorAll(`[id^="${mode}-row-"]`).forEach(r => r.classList.remove('active'));
+      rowEl.classList.add('active');
+      if (mode === 'mark') { selectedMarkId = id; loadMarkStudents(id); }
+      else                 { selectedVoirId = id; loadVoirStudents(id); }
+    }
+
+    // ══════════════════════════════════════════════════════
+    //  TAB 1 — MARQUER
+    // ══════════════════════════════════════════════════════
+    async function loadMarkStudents(classeId) {
+      const panel = document.getElementById('students-panel');
+      panel.innerHTML = '<div style="text-align:center;padding:60px;color:var(--gray-text);"><i class="fas fa-spinner fa-spin" style="font-size:1.5rem;"></i><p style="margin-top:12px;">Chargement...</p></div>';
+      const date = document.getElementById('mark-date')?.value || today();
+      try {
+        const res  = await fetch(`api.php?action=get_classe_students&id_classe=${classeId}&date=${date}`, { headers:{'X-User-Id':sessionStorage.getItem('user_id')||''} });
+        const data = await res.json();
+        if (data.success) {
+          studentsData[classeId] = data.students;
+          presenceMap = {};
+          data.students.forEach(s => { presenceMap[s.id_user] = s.present == 1; });
+          renderMarkPanel(classeId, date);
+        }
+      } catch(e) { panel.innerHTML = '<div style="padding:40px;text-align:center;color:red;">Erreur</div>'; }
+    }
+
+    function renderMarkPanel(classeId, date) {
+      const students = studentsData[classeId];
+      const panel    = document.getElementById('students-panel');
+      const cl       = classesData.find(c => c.id_classe == classeId);
+      if (!students?.length) {
+        panel.innerHTML = `<div class="students-panel-header"><h3>${esc(cl?.nom_classe||'Classe')}</h3><p>Aucun étudiant</p></div><div class="empty-select"><i class="fas fa-user-slash"></i><p>Aucun étudiant dans cette classe</p></div>`;
+        return;
+      }
+      panel.innerHTML = `
+        <div class="students-panel-header">
+          <h3 style="font-size:1rem;font-weight:700;color:var(--text-dark);"><i class="fas fa-users" style="color:var(--blue-mid);margin-right:8px;"></i>${esc(cl?.nom_classe||'Classe')}</h3>
+          <p style="font-size:.8rem;color:var(--gray-text);margin-top:4px;">Séance du ${fmtLong(date)} – ${students.length} étudiant${students.length>1?'s':''}</p>
+        </div>
+        <div class="select-all-bar">
+          <span style="font-size:.78rem;font-weight:600;color:var(--gray-text);flex:1;">Sélection rapide :</span>
+          <button onclick="setAll(true)"><i class="fas fa-check-double" style="color:var(--green);margin-right:4px;"></i>Tous présents</button>
+          <button onclick="setAll(false)"><i class="fas fa-times" style="color:var(--red);margin-right:4px;"></i>Tous absents</button>
+        </div>
+        <div style="overflow-x:auto;">
+          <table class="presence-table">
+            <thead><tr><th style="width:40px;">#</th><th>Étudiant</th><th>Email</th><th style="text-align:center;">Présence</th></tr></thead>
+            <tbody id="mark-tbody"></tbody>
+          </table>
+        </div>
+        <div class="presence-stats" id="mark-stats"></div>
+        <div style="padding:16px 24px;border-top:1px solid var(--gray-border);display:flex;justify-content:flex-end;">
+          <button class="btn-save-presence" id="save-btn" onclick="savePresence()"><i class="fas fa-save"></i> Enregistrer les présences</button>
+        </div>`;
+      renderMarkRows(students);
+      updateMarkStats();
+    }
+
+    function renderMarkRows(students) {
+      const tbody = document.getElementById('mark-tbody');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+      students.forEach((s, i) => {
+        const ok = presenceMap[s.id_user] || false;
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td style="color:var(--gray-text);font-size:.78rem;">${i+1}</td>
+          <td><div style="display:flex;align-items:center;gap:10px;">
+            <div class="avatar-sm" style="background:linear-gradient(135deg,var(--blue-mid),var(--orange));">${ini(s.prenom,s.nom)}</div>
+            <div><div style="font-weight:600;">${esc(s.prenom)} ${esc(s.nom)}</div><div style="font-size:.72rem;color:var(--gray-text);">${esc(s.niveau||'')} ${esc(s.td||'')}</div></div>
+          </div></td>
+          <td style="color:var(--gray-text);font-size:.82rem;">${esc(s.email||'')}</td>
+          <td style="text-align:center;">
+            <button class="presence-toggle ${ok?'present':'absent'}" id="tog-${s.id_user}" onclick="togP(${s.id_user},this)"></button>
+          </td>`;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function togP(uid, btn) {
+      presenceMap[uid] = !presenceMap[uid];
+      btn.classList.toggle('present', presenceMap[uid]);
+      btn.classList.toggle('absent', !presenceMap[uid]);
+      updateMarkStats();
+    }
+
+    function setAll(val) {
+      (studentsData[selectedMarkId]||[]).forEach(s => {
+        presenceMap[s.id_user] = val;
+        const b = document.getElementById('tog-'+s.id_user);
+        if(b){ b.classList.toggle('present',val); b.classList.toggle('absent',!val); }
+      });
+      updateMarkStats();
+    }
+
+    function updateMarkStats() {
+      const el = document.getElementById('mark-stats'); if(!el) return;
+      const st = studentsData[selectedMarkId]||[];
+      const tot = st.length, pre = st.filter(s=>presenceMap[s.id_user]).length, abs = tot-pre;
+      const pct = tot>0?Math.round((pre/tot)*100):0;
+      el.innerHTML = `
+        <div class="pstat"><div class="pstat-dot" style="background:var(--green);"></div>${pre} présent${pre>1?'s':''}</div>
+        <div class="pstat"><div class="pstat-dot" style="background:var(--red);"></div>${abs} absent${abs>1?'s':''}</div>
+        <div class="pstat"><div class="pstat-dot" style="background:var(--blue-mid);"></div>Taux: <strong style="color:${pct>=75?'var(--green)':pct>=50?'var(--orange)':'var(--red)'};">${pct}%</strong></div>`;
+    }
+
+    async function savePresence() {
+      const btn  = document.getElementById('save-btn');
+      const date = document.getElementById('mark-date')?.value || today();
+      const uid  = sessionStorage.getItem('user_id');
+      const records = (studentsData[selectedMarkId]||[]).map(s => ({ user_id:s.id_user, present:presenceMap[s.id_user]?1:0, id_classe:selectedMarkId }));
+      btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enregistrement...';
+      try {
+        const res  = await fetch('api.php?action=save_presence', { method:'POST', headers:{'Content-Type':'application/json','X-User-Id':uid||''}, body:JSON.stringify({date,records}) });
+        const data = await res.json();
+        if (data.success) { showToast('✅ Présences enregistrées !'); loadMarkStudents(selectedMarkId); }
+        else showToast('❌ Erreur: '+(data.error||'Inconnue'));
+      } catch(e){ showToast('❌ Erreur réseau'); }
+      btn.disabled=false; btn.innerHTML='<i class="fas fa-save"></i> Enregistrer les présences';
+    }
+
+    // ══════════════════════════════════════════════════════
+    //  TAB 2 — VOIR
+    // ══════════════════════════════════════════════════════
+    async function loadVoirStudents(classeId) {
+      const panel = document.getElementById('voir-panel');
+      panel.innerHTML = '<div style="text-align:center;padding:60px;color:var(--gray-text);"><i class="fas fa-spinner fa-spin" style="font-size:1.5rem;"></i><p style="margin-top:12px;">Chargement...</p></div>';
+      const date = document.getElementById('voir-date')?.value || today();
+      try {
+        const res  = await fetch(`api.php?action=get_classe_students&id_classe=${classeId}&date=${date}`, { headers:{'X-User-Id':sessionStorage.getItem('user_id')||''} });
+        const data = await res.json();
+        if (data.success) renderVoirPanel(classeId, data.students, date);
+        else panel.innerHTML = '<div style="padding:40px;text-align:center;color:red;">Erreur</div>';
+      } catch(e) { panel.innerHTML = '<div style="padding:40px;text-align:center;color:red;">Erreur réseau</div>'; }
+    }
+
+    function renderVoirPanel(classeId, students, date) {
+      const panel = document.getElementById('voir-panel');
+      const cl    = classesData.find(c => c.id_classe == classeId);
+      if (!students?.length) {
+        panel.innerHTML = `<div class="voir-panel-header"><h3>${esc(cl?.nom_classe||'Classe')}</h3></div><div class="empty-select"><i class="fas fa-user-slash"></i><p>Aucun étudiant</p></div>`;
+        return;
+      }
+      const tot = students.length, pre = students.filter(s=>s.present==1).length, abs = tot-pre;
+      const pct = tot>0?Math.round((pre/tot)*100):0;
+      const pColor = pct>=75?'#16a34a':pct>=50?'#d97706':'#ef4444';
+      const anyRec = students.some(s => s.present != null && s.present != 0) || students.some(s=>s.present==1);
+
+      panel.innerHTML = `
+        <div class="voir-panel-header">
+          <div>
+            <h3 style="font-size:1rem;font-weight:700;color:var(--text-dark);"><i class="fas fa-users" style="color:var(--blue-mid);margin-right:8px;"></i>${esc(cl?.nom_classe||'Classe')}</h3>
+            <p style="font-size:.8rem;color:var(--gray-text);margin-top:4px;">${fmtLong(date)} — ${tot} étudiant${tot>1?'s':''}</p>
+          </div>
+          <button onclick="switchTab('mark');jumpToClass(${classeId},'mark');"
+            style="padding:8px 16px;background:var(--blue-mid);color:#fff;border:none;border-radius:10px;font-family:inherit;font-size:.8rem;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;">
+            <i class="fas fa-pen"></i> Modifier
+          </button>
+        </div>
+
+        ${pre===0&&abs===tot ? `
+          <div style="padding:16px 24px;background:#fff7ed;border-bottom:1px solid #fed7aa;display:flex;align-items:center;gap:10px;">
+            <i class="fas fa-exclamation-triangle" style="color:#d97706;font-size:1.1rem;"></i>
+            <span style="font-size:.84rem;color:#92400e;font-weight:600;">
+              Aucune présence enregistrée pour ce jour.
+              <button onclick="switchTab('mark')" style="color:var(--blue-mid);background:none;border:none;cursor:pointer;font-weight:700;font-family:inherit;font-size:.84rem;">→ Aller marquer</button>
+            </span>
+          </div>` : ''}
+
+        <div class="summary-bar">
+          <div class="sbar-stat" style="background:#dcfce7;color:#16a34a;"><i class="fas fa-check-circle"></i> ${pre} présent${pre>1?'s':''}</div>
+          <div class="sbar-stat" style="background:#fee2e2;color:#ef4444;"><i class="fas fa-times-circle"></i> ${abs} absent${abs>1?'s':''}</div>
+          <div class="sbar-stat" style="background:var(--blue-soft);color:var(--blue-mid);"><i class="fas fa-percent"></i> Taux: <strong style="color:${pColor};margin-left:4px;">${pct}%</strong></div>
+          <div style="flex:1;"></div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:.78rem;color:var(--gray-text);">
+            <div style="width:120px;height:8px;background:#e5e7eb;border-radius:10px;overflow:hidden;">
+              <div style="width:${pct}%;height:100%;background:${pColor};border-radius:10px;"></div>
+            </div>${pct}%
+          </div>
+        </div>
+
+        <div style="overflow-x:auto;">
+          <table class="presence-table">
+            <thead><tr><th style="width:40px;">#</th><th>Étudiant</th><th>Email</th><th style="text-align:center;">Statut</th></tr></thead>
+            <tbody>
+              ${students.map((s,i)=>`
+                <tr>
+                  <td style="color:var(--gray-text);font-size:.78rem;">${i+1}</td>
+                  <td><div style="display:flex;align-items:center;gap:10px;">
+                    <div class="avatar-sm" style="background:${s.present==1?'linear-gradient(135deg,#16a34a,#4ade80)':'linear-gradient(135deg,#ef4444,#f87171)'};">${ini(s.prenom,s.nom)}</div>
+                    <div><div style="font-weight:600;">${esc(s.prenom)} ${esc(s.nom)}</div><div style="font-size:.72rem;color:var(--gray-text);">${esc(s.niveau||'')} ${esc(s.td||'')}</div></div>
+                  </div></td>
+                  <td style="color:var(--gray-text);font-size:.82rem;">${esc(s.email||'')}</td>
+                  <td style="text-align:center;">${s.present==1?'<span class="pres-badge present"><i class="fas fa-check-circle"></i> Présent</span>':'<span class="pres-badge absent"><i class="fas fa-times-circle"></i> Absent</span>'}</td>
+                </tr>`).join('')}
+            </tbody>
+          </table>
+        </div>`;
+    }
+
+    function jumpToClass(id, mode) {
+      const rowEl = document.getElementById(mode+'-row-'+id);
+      if (!rowEl) return;
+      let p = rowEl.parentElement;
+      while (p && p.id !== 'main-content-area') {
+        if (p.classList.contains('classe-list') || p.classList.contains('niveau-list')) {
+          p.classList.add('open');
+          const hdr = p.previousElementSibling;
+          if (hdr) { hdr.classList.add('open'); const chev=hdr.querySelector('.grade-chevron'); if(chev) chev.classList.add('open'); }
+        }
+        p = p.parentElement;
+      }
+      rowEl.click();
+      rowEl.scrollIntoView({ behavior:'smooth', block:'center' });
+    }
+
+    // ══════════════════════════════════════════════════════
+    //  ÉTUDIANT VIEW
+    // ══════════════════════════════════════════════════════
+    async function loadEtudPresence() {
+      const body  = document.getElementById('etud-body');
+      const dateV = document.getElementById('etud-date')?.value || '';
+      const uid   = sessionStorage.getItem('user_id');
+      body.innerHTML = '<div style="text-align:center;padding:40px;color:var(--gray-text);"><i class="fas fa-spinner fa-spin" style="font-size:1.5rem;"></i><p style="margin-top:12px;">Chargement...</p></div>';
+      try {
+        let url = `api.php?action=get_student_presence&user_id=${uid}`;
+        if (dateV) url += `&date=${dateV}`;
+        const res  = await fetch(url, { headers:{'X-User-Id':uid||''} });
+        const data = await res.json();
+        etudRows = (data.success && Array.isArray(data.records)) ? data.records : [];
+        renderEtudRows();
+      } catch(e) { document.getElementById('etud-body').innerHTML='<div style="padding:20px;text-align:center;color:red;">Erreur</div>'; }
+    }
+
+    function renderEtudRows() {
+      const body   = document.getElementById('etud-body');
+      const stats  = document.getElementById('etud-stats');
+      const search = (document.getElementById('etud-subject')?.value||'').toLowerCase();
+      const rows   = etudRows.filter(r => !search||(r.nom_classe||r.specialite||'').toLowerCase().includes(search));
+      const tot=rows.length, pre=rows.filter(r=>r.present==1).length, abs=tot-pre;
+      const pct=tot>0?Math.round((pre/tot)*100):0;
+      if (stats) stats.innerHTML = tot===0?'':`
+        <div class="sbar-stat" style="background:#dcfce7;color:#16a34a;border-radius:12px;"><i class="fas fa-check-circle"></i> ${pre} présence${pre>1?'s':''}</div>
+        <div class="sbar-stat" style="background:#fee2e2;color:#ef4444;border-radius:12px;"><i class="fas fa-times-circle"></i> ${abs} absence${abs>1?'s':''}</div>
+        <div class="sbar-stat" style="background:var(--blue-soft);color:var(--blue-mid);border-radius:12px;"><i class="fas fa-percent"></i> Taux: <strong style="color:${pct>=75?'#16a34a':pct>=50?'#d97706':'#ef4444'};margin-left:4px;">${pct}%</strong></div>`;
+      if (!rows.length) {
+        body.innerHTML=`<div style="text-align:center;padding:60px;color:var(--gray-text);"><i class="fas fa-inbox" style="font-size:2rem;opacity:.3;display:block;margin-bottom:12px;"></i><p style="font-weight:600;">${etudRows.length===0?'Aucune présence enregistrée':'Aucun résultat'}</p><p style="font-size:.82rem;margin-top:6px;">${etudRows.length===0?'Vos présences apparaîtront ici une fois enregistrées par votre professeur.':''}</p></div>`;
+        return;
+      }
+      body.innerHTML=`<div style="overflow-x:auto;"><table class="presence-table">
+        <thead><tr><th>Date</th><th>Classe / Matière</th><th style="text-align:center;">Statut</th><th>Professeur</th></tr></thead>
+        <tbody>${rows.map(r=>`<tr>
+          <td style="font-size:.83rem;white-space:nowrap;">${fmtShort(r.date_presence)}</td>
+          <td><div style="font-weight:600;font-size:.83rem;">${esc(r.nom_classe||'—')}</div>${r.specialite?`<div style="font-size:.72rem;color:var(--gray-text);">${esc(r.specialite)}</div>`:''}</td>
+          <td style="text-align:center;">${r.present==1?'<span class="pres-badge present"><i class="fas fa-check-circle"></i> Présent</span>':'<span class="pres-badge absent"><i class="fas fa-times-circle"></i> Absent</span>'}</td>
+          <td style="font-size:.8rem;color:var(--gray-text);">
+            <div style="display:flex;align-items:center;gap:8px;">
+              <div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--blue-mid),var(--orange));color:#fff;display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:700;flex-shrink:0;">${((r.prof_prenom||'?')[0]+(r.prof_nom||'?')[0]).toUpperCase()}</div>
+              ${esc(r.prof_prenom||'')} ${esc(r.prof_nom||'')}
+            </div>
+          </td>
+        </tr>`).join('')}</tbody>
+      </table></div>`;
+    }
+
+    // ── TOAST ─────────────────────────────────────────────
+    function showToast(msg) {
+      const old=document.getElementById('save-toast'); if(old)old.remove();
+      const t=document.createElement('div'); t.id='save-toast'; t.className='save-toast';
+      t.innerHTML=`<i class="fas fa-check-circle"></i> ${msg}`; document.body.appendChild(t);
+      setTimeout(()=>{ t.style.opacity='0'; t.style.transition='opacity .3s'; setTimeout(()=>t.remove(),300); },3000);
+    }
+  </script>
+</body>
+</html>

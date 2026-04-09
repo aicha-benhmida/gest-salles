@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nouveautés – ISIMM Rooms</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link rel="stylesheet" href="style.css" />
+  <script src="app.js"></script>
+  <style>
+    .news-feed { display:flex; flex-direction:column; gap:20px; }
+
+    .news-card {
+      background:#fff; border-radius:16px; border:1px solid var(--gray-border);
+      box-shadow:0 2px 12px rgba(0,0,0,0.05); overflow:hidden;
+      transition:transform .2s, box-shadow .2s;
+    }
+    .news-card:hover { transform:translateY(-2px); box-shadow:0 6px 24px rgba(0,0,0,0.1); }
+
+    .news-card-header {
+      padding:20px 24px 0;
+      display:flex; align-items:flex-start; justify-content:space-between; gap:12px;
+    }
+    .news-badge {
+      display:inline-flex; align-items:center; gap:6px;
+      padding:4px 12px; border-radius:20px; font-size:.7rem; font-weight:700;
+      text-transform:uppercase; letter-spacing:.5px; flex-shrink:0;
+    }
+    .news-badge.tous      { background:#eef2ff; color:var(--blue-mid); }
+    .news-badge.etudiant  { background:#dcfce7; color:var(--green-dark); }
+    .news-badge.prof      { background:#fef3c7; color:var(--amber); }
+
+    .news-card-body { padding:12px 24px 20px; }
+    .news-title { font-size:1.05rem; font-weight:700; color:var(--text-dark); margin-bottom:8px; }
+    .news-content {
+      font-size:.88rem; color:#4a5568; line-height:1.75;
+      white-space:pre-line;
+    }
+    .news-content.collapsed {
+      display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden;
+    }
+    .news-card-footer {
+      padding:12px 24px; border-top:1px solid var(--gray-border);
+      display:flex; align-items:center; justify-content:space-between;
+      background:var(--gray-bg);
+    }
+    .news-meta { display:flex; align-items:center; gap:16px; font-size:.78rem; color:var(--gray-text); }
+    .news-meta span { display:flex; align-items:center; gap:5px; }
+    .news-expand-btn {
+      background:none; border:none; color:var(--blue-mid); font-size:.78rem;
+      font-weight:600; cursor:pointer; font-family:inherit; padding:4px 8px;
+      border-radius:6px; transition:background .15s;
+    }
+    .news-expand-btn:hover { background:var(--blue-soft); }
+
+    .empty-news {
+      text-align:center; padding:80px 20px; color:var(--gray-text);
+    }
+    .empty-news i { font-size:3rem; opacity:.3; margin-bottom:16px; }
+
+    .filter-pill-bar { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:24px; }
+    .filter-pill {
+      padding:6px 16px; border-radius:20px; border:1.5px solid var(--gray-border);
+      background:#fff; font-size:.8rem; font-weight:600; cursor:pointer;
+      font-family:inherit; color:var(--gray-text); transition:all .15s;
+    }
+    .filter-pill.active { background:var(--blue-mid); color:#fff; border-color:var(--blue-mid); }
+    .filter-pill:hover:not(.active) { border-color:var(--blue-mid); color:var(--blue-mid); }
+
+    .new-dot {
+      display:inline-block; width:8px; height:8px; border-radius:50%;
+      background:var(--orange); margin-left:6px; vertical-align:middle;
+      animation:pulse 2s infinite;
+    }
+    @keyframes pulse { 0%,100%{opacity:1}50%{opacity:.4} }
+  </style>
+</head>
+<body class="dashboard-page">
+
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="logo">
+        <img src="logo_isimm.jpg" alt="ISIMM Logo" />
+        <div class="logo-text">
+          <span class="logo-title" id="logo-title">ISIMM Rooms</span>
+          <span class="logo-subtitle" id="logo-subtitle">Espace</span>
+        </div>
+      </div>
+    </div>
+    <nav class="sidebar-nav"><ul id="sidebar-nav-list"></ul></nav>
+    <div class="sidebar-footer">
+      <div class="user-profile" id="user-profile"></div>
+      <a href="login.html" class="logout-btn" onclick="sessionStorage.clear()">
+        <i class="fas fa-sign-out-alt"></i><span>Déconnexion</span>
+      </a>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <header class="header">
+      <div class="header-title">
+        <h1>Nouveautés <span>& Annonces</span></h1>
+        <p>Restez informé des dernières actualités de l'ISIMM</p>
+      </div>
+      <div class="header-actions">
+        <button class="notification-btn">
+          <i class="fas fa-bell"></i>
+          <span class="notification-badge" id="notif-count">0</span>
+        </button>
+        <button class="profile-btn"><i class="fas fa-user"></i></button>
+      </div>
+    </header>
+
+    <div class="content">
+
+      <!-- Filter pills -->
+      <div class="filter-pill-bar">
+        <button class="filter-pill active" onclick="filterNews('', this)">
+          <i class="fas fa-globe" style="margin-right:4px;"></i>Toutes
+        </button>
+        <button class="filter-pill" onclick="filterNews('tous', this)">
+          <i class="fas fa-users" style="margin-right:4px;"></i>Général
+        </button>
+        <button class="filter-pill" onclick="filterNews('etudiant', this)">
+          <i class="fas fa-user-graduate" style="margin-right:4px;"></i>Étudiants
+        </button>
+        <button class="filter-pill" onclick="filterNews('prof', this)">
+          <i class="fas fa-chalkboard-user" style="margin-right:4px;"></i>Enseignants
+        </button>
+      </div>
+
+      <!-- News feed -->
+      <div class="news-feed" id="news-feed">
+        <div style="text-align:center;padding:60px;color:var(--gray-text);">
+          <i class="fas fa-spinner fa-spin" style="font-size:2rem;"></i>
+          <p style="margin-top:12px;">Chargement des actualités...</p>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <button class="help-btn" onclick="openHelpModal()"><i class="fas fa-question"></i></button>
+
+  <!-- Admin FAB: floating + button -->
+  <button id="fab-compose" onclick="openComposeModal()"
+    style="display:none;position:fixed;bottom:80px;right:88px;width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,var(--blue-mid),var(--orange));color:#fff;border:none;font-size:1.4rem;cursor:pointer;box-shadow:0 4px 20px rgba(37,99,235,.4);z-index:8000;transition:all .2s;align-items:center;justify-content:center;" title="Publier une annonce">
+    <i class="fas fa-plus"></i>
+  </button>
+
+  <!-- Compose modal -->
+  <div id="compose-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9000;align-items:center;justify-content:center;" onclick="if(event.target===this)closeComposeModal()">
+    <div style="background:#fff;border-radius:20px;padding:28px;width:90%;max-width:560px;box-shadow:0 20px 60px rgba(0,0,0,.2);" onclick="event.stopPropagation()">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--gray-border);">
+        <h3 style="font-size:1.05rem;font-weight:700;color:var(--text-dark);"><i class="fas fa-pen" style="color:var(--blue-mid);margin-right:8px;"></i>Publier une annonce</h3>
+        <button onclick="closeComposeModal()" style="background:none;border:none;font-size:1.4rem;cursor:pointer;color:var(--gray-text);"><i class="fas fa-times"></i></button>
+      </div>
+      <div id="compose-success" style="display:none;background:#dcfce7;color:#16a34a;border:1px solid #bbf7d0;border-radius:10px;padding:10px 16px;font-size:.85rem;margin-bottom:14px;">
+        <i class="fas fa-check-circle"></i> Annonce publiée !
+      </div>
+      <div style="margin-bottom:14px;">
+        <label style="font-size:.78rem;font-weight:700;color:var(--gray-text);text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:6px;">Titre *</label>
+        <input id="compose-titre" type="text" placeholder="Ex: Fermeture des labos vendredi..." class="form-input" style="width:100%;box-sizing:border-box;" />
+      </div>
+      <div style="margin-bottom:16px;">
+        <label style="font-size:.78rem;font-weight:700;color:var(--gray-text);text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:6px;">Contenu *</label>
+        <textarea id="compose-contenu" placeholder="Détails de l'annonce..." style="width:100%;min-height:100px;border:1.5px solid var(--gray-border);border-radius:10px;padding:10px 14px;font-family:inherit;font-size:.88rem;outline:none;resize:vertical;box-sizing:border-box;" onfocus="this.style.borderColor='var(--blue-mid)'" onblur="this.style.borderColor='var(--gray-border)'"></textarea>
+      </div>
+      <div style="margin-bottom:20px;">
+        <label style="font-size:.78rem;font-weight:700;color:var(--gray-text);text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:10px;">Destinataires *</label>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;" id="compose-targets">
+          <label id="tgt-tous" onclick="setComposeCible('tous',this)" style="display:flex;align-items:center;gap:8px;padding:8px 16px;border-radius:10px;border:2px solid var(--blue-mid);background:var(--blue-soft);cursor:pointer;font-size:.85rem;font-weight:600;transition:all .15s;">
+            <i class="fas fa-users" style="color:var(--blue-mid);"></i> Général
+          </label>
+          <label id="tgt-etudiant" onclick="setComposeCible('etudiant',this)" style="display:flex;align-items:center;gap:8px;padding:8px 16px;border-radius:10px;border:2px solid var(--gray-border);cursor:pointer;font-size:.85rem;font-weight:600;transition:all .15s;">
+            <i class="fas fa-user-graduate"></i> Étudiants
+          </label>
+          <label id="tgt-prof" onclick="setComposeCible('prof',this)" style="display:flex;align-items:center;gap:8px;padding:8px 16px;border-radius:10px;border:2px solid var(--gray-border);cursor:pointer;font-size:.85rem;font-weight:600;transition:all .15s;">
+            <i class="fas fa-chalkboard-user"></i> Enseignants
+          </label>
+          <label id="tgt-all" onclick="setComposeCible('all',this)" style="display:flex;align-items:center;gap:8px;padding:8px 16px;border-radius:10px;border:2px solid var(--gray-border);cursor:pointer;font-size:.85rem;font-weight:600;transition:all .15s;">
+            <i class="fas fa-globe"></i> Tous
+          </label>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;justify-content:flex-end;">
+        <button onclick="closeComposeModal()" style="padding:10px 20px;background:var(--gray-bg);border:1.5px solid var(--gray-border);border-radius:10px;font-family:inherit;font-size:.88rem;font-weight:600;cursor:pointer;color:var(--text-dark);">Annuler</button>
+        <button id="compose-submit-btn" onclick="submitCompose()" style="padding:10px 24px;background:linear-gradient(135deg,var(--blue-mid),var(--blue-light));color:#fff;border:none;border-radius:10px;font-family:inherit;font-size:.88rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:8px;">
+          <i class="fas fa-paper-plane"></i> Publier
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let allNews = [];
+    let currentFilter = '';
+
+    const CIBLE_LABELS = { tous:'Général', etudiant:'Étudiants', prof:'Enseignants', all:'Tous' };
+    const CIBLE_ICONS  = { tous:'fa-users', etudiant:'fa-user-graduate', prof:'fa-chalkboard-user', all:'fa-globe' };
+
+    function filterNews(cible, btn) {
+      currentFilter = cible;
+      document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+      renderNews();
+    }
+
+    function renderNews() {
+      const feed = document.getElementById('news-feed');
+      const role = sessionStorage.getItem('user_role') || 'etudiant';
+
+      const filtered = allNews.filter(n => {
+        if (currentFilter && n.cible !== currentFilter) return false;
+        return true;
+      });
+
+      if (filtered.length === 0) {
+        feed.innerHTML = `<div class="empty-news">
+          <i class="fas fa-newspaper"></i>
+          <p style="font-size:1rem;font-weight:600;margin-bottom:8px;">Aucune actualité</p>
+          <p style="font-size:.85rem;">Il n'y a pas d'annonces pour le moment.</p>
+        </div>`;
+        return;
+      }
+
+      feed.innerHTML = '';
+      filtered.forEach((n, idx) => {
+        const isNew = isRecent(n.created_at);
+        const card  = document.createElement('div');
+        card.className = 'news-card';
+        card.innerHTML = `
+          <div class="news-card-header">
+            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+              <span class="news-badge ${n.cible}">
+                <i class="fas ${CIBLE_ICONS[n.cible]||'fa-globe'}"></i>
+                ${CIBLE_LABELS[n.cible]||n.cible}
+              </span>
+              ${isNew ? '<span style="background:#fff5f0;color:var(--orange);font-size:.7rem;font-weight:700;padding:3px 10px;border-radius:20px;border:1px solid #fed7aa;">🔥 Nouveau</span>' : ''}
+            </div>
+            <span style="font-size:.75rem;color:var(--gray-text);white-space:nowrap;">${formatDate(n.created_at)}</span>
+          </div>
+          <div class="news-card-body">
+            <div class="news-title">${escHtml(n.titre)}${isNew ? '<span class="new-dot"></span>' : ''}</div>
+            <div class="news-content collapsed" id="news-content-${n.id_news}">${escHtml(n.contenu)}</div>
+          </div>
+          <div class="news-card-footer">
+            <div class="news-meta">
+              <span><i class="fas fa-user-shield"></i> ${escHtml(n.auteur_prenom||'')} ${escHtml(n.auteur_nom||'')}</span>
+              <span><i class="fas fa-clock"></i> ${timeAgo(n.created_at)}</span>
+            </div>
+            <button class="news-expand-btn" id="expand-btn-${n.id_news}" onclick="toggleExpand(${n.id_news})">
+              Lire la suite <i class="fas fa-chevron-down"></i>
+            </button>
+          </div>`;
+        feed.appendChild(card);
+        // Hide expand btn if content is short
+        setTimeout(() => {
+          const el = document.getElementById('news-content-'+n.id_news);
+          if (el && el.scrollHeight <= el.clientHeight + 5) {
+            const btn = document.getElementById('expand-btn-'+n.id_news);
+            if (btn) btn.style.display = 'none';
+          }
+        }, 0);
+      });
+    }
+
+    function toggleExpand(id) {
+      const el  = document.getElementById('news-content-'+id);
+      const btn = document.getElementById('expand-btn-'+id);
+      if (!el) return;
+      const collapsed = el.classList.toggle('collapsed');
+      if (btn) btn.innerHTML = collapsed
+        ? 'Lire la suite <i class="fas fa-chevron-down"></i>'
+        : 'Réduire <i class="fas fa-chevron-up"></i>';
+    }
+
+    function isRecent(dt) {
+      if (!dt) return false;
+      return (Date.now() - new Date(dt).getTime()) < 48 * 3600 * 1000;
+    }
+
+    function formatDate(dt) {
+      if (!dt) return '—';
+      return new Date(dt).toLocaleDateString('fr-FR', { day:'2-digit', month:'long', year:'numeric' });
+    }
+
+    function timeAgo(dt) {
+      if (!dt) return '';
+      const diff = Math.floor((Date.now() - new Date(dt).getTime()) / 1000);
+      if (diff < 60)   return 'À l\'instant';
+      if (diff < 3600) return Math.floor(diff/60) + ' min';
+      if (diff < 86400)return Math.floor(diff/3600) + 'h';
+      return Math.floor(diff/86400) + 'j';
+    }
+
+    function escHtml(t) {
+      if (!t) return '';
+      return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+
+    async function loadNews() {
+      try {
+        const res  = await fetch('api.php?action=get_news', {
+          headers: { 'X-User-Id': sessionStorage.getItem('user_id') || '' }
+        });
+        const data = await res.json();
+        if (data.success && Array.isArray(data.news)) {
+          allNews = data.news;
+          renderNews();
+        } else {
+          document.getElementById('news-feed').innerHTML = `<div class="empty-news"><i class="fas fa-newspaper"></i><p>Aucune actualité disponible.</p></div>`;
+        }
+      } catch(e) {
+        document.getElementById('news-feed').innerHTML = `<div class="empty-news"><i class="fas fa-exclamation-circle"></i><p>Erreur de chargement.</p></div>`;
+      }
+    }
+
+    // ── Admin compose functions ──────────────────────────
+    let composeCible = 'tous';
+
+    function openComposeModal() {
+      document.getElementById('compose-modal').style.display = 'flex';
+      document.body.style.overflow = 'hidden';
+    }
+    function closeComposeModal() {
+      document.getElementById('compose-modal').style.display = 'none';
+      document.body.style.overflow = '';
+      document.getElementById('compose-success').style.display = 'none';
+      document.getElementById('compose-titre').value = '';
+      document.getElementById('compose-contenu').value = '';
+    }
+    function setComposeCible(val, el) {
+      composeCible = val;
+      document.querySelectorAll('#compose-targets label').forEach(l => {
+        l.style.borderColor = 'var(--gray-border)';
+        l.style.background  = '#fff';
+      });
+      el.style.borderColor = 'var(--blue-mid)';
+      el.style.background  = 'var(--blue-soft)';
+    }
+    async function submitCompose() {
+      const titre   = document.getElementById('compose-titre').value.trim();
+      const contenu = document.getElementById('compose-contenu').value.trim();
+      if (!titre || !contenu) { alert('Titre et contenu requis'); return; }
+      const btn = document.getElementById('compose-submit-btn');
+      btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Publication...';
+      try {
+        const res  = await fetch('api.php?action=publish_news', {
+          method:'POST',
+          headers:{'Content-Type':'application/json','X-User-Id':sessionStorage.getItem('user_id')||''},
+          body: JSON.stringify({ titre, contenu, cible: composeCible })
+        });
+        const data = await res.json();
+        if (data.success) {
+          document.getElementById('compose-success').style.display = 'block';
+          document.getElementById('compose-titre').value = '';
+          document.getElementById('compose-contenu').value = '';
+          await loadNews();
+          setTimeout(closeComposeModal, 1500);
+        } else {
+          alert('Erreur: ' + (data.error || 'inconnue'));
+        }
+      } catch(e) { alert('Erreur réseau'); }
+      btn.disabled = false; btn.innerHTML = '<i class="fas fa-paper-plane"></i> Publier';
+    }
+
+    // Show FAB only for admin
+    document.addEventListener('DOMContentLoaded', () => {
+      const role = sessionStorage.getItem('user_role');
+      if (role === 'admin') {
+        const fab = document.getElementById('fab-compose');
+        if (fab) { fab.style.display = 'flex'; }
+      }
+      loadNews();
+    });
+  </script>
+</body>
+</html>

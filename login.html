@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ISIMM Rooms – Connexion</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="auth-page">
+
+  <div class="auth-left">
+    <div class="spark-icon">✦</div>
+    <h2>Bon retour sur<br />ISIMM Rooms</h2>
+    <p>Gérez vos réservations, signalez les pannes et accédez à votre espace.</p>
+    <div class="features">
+      <div class="feature-card">
+        <div class="check-circle">✓</div>
+        <div class="feature-text">
+          <strong>Accès sécurisé</strong>
+          <span>Authentification par rôle</span>
+        </div>
+      </div>
+      <div class="feature-card">
+        <div class="check-circle">✓</div>
+        <div class="feature-text">
+          <strong>Tableau de bord personnalisé</strong>
+          <span>Étudiant, Prof, Tech, Admin</span>
+        </div>
+      </div>
+      <div class="feature-card">
+        <div class="check-circle">✓</div>
+        <div class="feature-text">
+          <strong>Disponible 24/7</strong>
+          <span>Réservez à tout moment</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="auth-right">
+    <div class="logo">
+      <div class="logo-img-wrapper">
+        <a href="acceuil.html" style="text-decoration: none;">
+        <img src="logo_isimm.jpg" alt="Logo ISIMM" /></a>
+      </div>
+      <a href="acceuil.html" style="text-decoration: none;">
+      <span class="logo-text">ISIMM <span>Rooms</span></span></a>
+    </div>
+
+    <h1>Connexion</h1>
+    <p class="subtitle">Entrez vos identifiants pour accéder à votre espace</p>
+
+    <div id="error-msg" style="display:none;" class="alert alert-error">
+      <i class="fas fa-exclamation-circle"></i> Email ou mot de passe incorrect.
+    </div>
+
+    <div class="field">
+      <label for="email">Adresse email</label>
+      <div class="input-wrap">
+        <span class="icon"><i class="fas fa-envelope"></i></span>
+        <input type="email" id="email" placeholder="votre.email@isimm.tn" />
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="password">Mot de passe</label>
+      <div class="input-wrap">
+        <span class="icon"><i class="fas fa-lock"></i></span>
+        <input type="password" id="password" placeholder="••••••••"
+               onkeypress="if(event.key==='Enter') handleLogin()" />
+        <button class="eye-btn" type="button" onclick="togglePwd('password')">
+          <i class="fas fa-eye"></i>
+        </button>
+      </div>
+    </div>
+
+    <button class="btn-login" onclick="handleLogin()">
+      <i class="fas fa-sign-in-alt"></i> Se connecter
+    </button>
+
+    <div class="divider">Ou</div>
+    <p class="login-link">Pas encore de compte ? <a href="si.html">S'inscrire</a></p>
+  </div>
+
+  <button class="help-btn" onclick="openHelpModal()"><i class="fas fa-question"></i></button>
+
+  <!-- Single JS file — no inline scripts -->
+  <script src="app.js"></script>
+</body>
+</html>

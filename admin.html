@@ -1,0 +1,1105 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Administration – ISIMM Rooms</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    /* ── Admin tabs ── */
+    .admin-tabs { display:flex; gap:6px; margin-bottom:24px; border-bottom:2px solid var(--gray-border); padding-bottom:0; }
+    .admin-tab-btn {
+      background: none; border: none; border-bottom: 3px solid transparent;
+      padding: 10px 20px; font-family: 'Poppins', sans-serif; font-size: .88rem;
+      font-weight: 600; color: var(--gray-text); cursor: pointer; transition: all .15s;
+      margin-bottom: -2px;
+    }
+    .admin-tab-btn.active { color: var(--blue-mid); border-bottom-color: var(--blue-mid); }
+    .admin-tab-btn:hover:not(.active) { color: var(--dark-text); }
+    .admin-panel { display: none; }
+    .admin-panel.active { display: block; }
+
+    /* ── Misc ── */
+    .btn-sm { padding: 4px 10px; font-size: .78rem; border: none; border-radius: 6px; cursor: pointer; }
+    .btn-blue  { background: var(--blue-soft); color: var(--blue-mid); }
+    .btn-green { background: #dcfce7; color: #16a34a; }
+    .btn-red   { background: #fee2e2; color: #ef4444; }
+    .tech-item:hover { background: var(--blue-soft); }
+  </style>
+</head>
+<body class="dashboard-page">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="logo">
+        <img src="logo_isimm.jpg" alt="ISIMM Logo" />
+        <div class="logo-text">
+          <span class="logo-title" id="logo-title">ISIMM Rooms</span>
+          <span class="logo-subtitle" id="logo-subtitle">Espace</span>
+        </div>
+      </div>
+    </div>
+    <nav class="sidebar-nav"><ul id="sidebar-nav-list"></ul></nav>
+    <div class="sidebar-footer">
+      <div class="user-profile" id="user-profile"></div>
+      <a href="login.html" class="logout-btn" onclick="sessionStorage.clear()">
+        <i class="fas fa-sign-out-alt"></i><span>Déconnexion</span>
+      </a>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main-content">
+    <header class="header">
+      <div class="header-title">
+        <h1>Administration <span>ISIMM</span></h1>
+        <p>Gérez les signalements, utilisateurs et étudiants</p>
+      </div>
+      <div class="header-actions">
+        <button class="notification-btn">
+          <i class="fas fa-bell"></i>
+          <span class="notification-badge" id="notif-count">0</span>
+        </button>
+        <button class="profile-btn"><i class="fas fa-user"></i></button>
+      </div>
+    </header>
+
+    <div class="content">
+
+      <!-- Global stats row -->
+      <div class="stats-grid" style="margin-bottom:24px;">
+        <div class="stat-card">
+          <div class="stat-info"><h3>Total réservations</h3><div class="stat-value" id="stat-total-res">—</div></div>
+          <div class="stat-icon blue"><i class="fas fa-calendar-check"></i></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-info"><h3>Salles disponibles</h3><div class="stat-value" id="stat-salles-dispo">—</div></div>
+          <div class="stat-icon green"><i class="fas fa-door-open"></i></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-info"><h3>Signalements ouverts</h3><div class="stat-value" id="stat-signalements">—</div></div>
+          <div class="stat-icon red"><i class="fas fa-exclamation-triangle"></i></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-info"><h3>Taux d'occupation</h3><div class="stat-value" id="stat-taux">—</div></div>
+          <div class="stat-icon orange"><i class="fas fa-chart-pie"></i></div>
+        </div>
+      </div>
+
+      <!-- TABS -->
+      <div class="admin-tabs">
+        <button class="admin-tab-btn active" onclick="switchAdminTab('panel-signalements', this)">
+          <i class="fas fa-flag"></i> Signalements
+        </button>
+        <button class="admin-tab-btn" onclick="switchAdminTab('panel-users', this)">
+          <i class="fas fa-users"></i> Utilisateurs
+        </button>
+        <button class="admin-tab-btn" onclick="switchAdminTab('panel-etudiants', this)">
+          <i class="fas fa-user-graduate"></i> Étudiants
+        </button>
+        <button class="admin-tab-btn" onclick="switchAdminTab('panel-news', this)">
+          <i class="fas fa-newspaper"></i> Nouveautés
+        </button>
+      </div>
+
+      <!-- ─────────────────────────────────────────────────────
+           PANEL: SIGNALEMENTS
+           ───────────────────────────────────────────────────── -->
+      <div id="panel-signalements" class="admin-panel active">
+        <div class="filter-bar" style="margin-bottom:20px;">
+          <select class="form-select" id="filter-statut" onchange="filterReclamations()" style="max-width:200px;">
+            <option value="">Tous les statuts</option>
+            <option value="en attente">En attente</option>
+            <option value="en cours">En cours</option>
+            <option value="resolue">Résolue</option>
+          </select>
+          <select class="form-select" id="filter-categorie" onchange="filterReclamations()" style="max-width:200px;">
+            <option value="">Toutes catégories</option>
+            <option value="IT_RESEAU">Wi-Fi / Réseau</option>
+            <option value="MAINTENANCE_CLIM">Climatisation</option>
+            <option value="PROJECTEUR">Projecteur</option>
+            <option value="ELECTRIQUE">Électricité</option>
+            <option value="Autre">Autre</option>
+          </select>
+          <div class="search-input-wrap">
+            <i class="fas fa-search"></i>
+            <input type="text" id="search-rec" placeholder="Rechercher..." oninput="filterReclamations()" />
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Tous les signalements</h3>
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>#</th><th>Salle</th><th>Catégorie IA</th>
+                  <th>Description</th><th>Date</th><th>Statut</th>
+                  <th>Technicien</th><th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="reclamations-table">
+                <tr><td colspan="8" style="text-align:center;padding:40px;">
+                  <i class="fas fa-spinner fa-spin" style="font-size:1.5rem;"></i><p>Chargement...</p>
+                </td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ─────────────────────────────────────────────────────
+           PANEL: UTILISATEURS
+           ───────────────────────────────────────────────────── -->
+      <div id="panel-users" class="admin-panel">
+        <style>
+          /* ── Users 4-column card layout ── */
+          .users-cols-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 14px;
+            margin-bottom: 24px;
+          }
+          @media(max-width:900px) { .users-cols-grid { grid-template-columns: repeat(2,1fr); } }
+          @media(max-width:560px) { .users-cols-grid { grid-template-columns: 1fr; } }
+
+          .ucol-card {
+            background: #fff;
+            border: 2px solid var(--gray-border);
+            border-radius: 14px;
+            padding: 18px 20px;
+            cursor: pointer;
+            transition: all .18s;
+            display: flex; flex-direction: column; gap: 8px;
+          }
+          .ucol-card:hover { border-color: var(--blue-mid); box-shadow: 0 4px 16px rgba(37,99,235,.1); transform: translateY(-2px); }
+          .ucol-card.active { border-color: var(--blue-mid); background: var(--blue-soft); }
+
+          .ucol-top { display: flex; align-items: center; justify-content: space-between; }
+          .ucol-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0; }
+          .ucol-count { font-size: 1.7rem; font-weight: 800; color: var(--text-dark); }
+          .ucol-label { font-size: .82rem; font-weight: 600; color: var(--gray-text); }
+          .ucol-link { font-size: .75rem; color: var(--blue-mid); font-weight: 600; display: flex; align-items: center; gap: 4px; }
+
+          /* User list cards */
+          .ulist-section { background: #fff; border-radius: 14px; border: 1.5px solid var(--gray-border); overflow: hidden; }
+          .ulist-header {
+            padding: 16px 20px; border-bottom: 1px solid var(--gray-border);
+            display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;
+            background: linear-gradient(135deg, var(--blue-soft) 0%, #fff 100%);
+          }
+          .ulist-header h3 { font-size: .95rem; font-weight: 700; color: var(--text-dark); display: flex; align-items: center; gap: 8px; }
+          .ulist-search { display: flex; align-items: center; gap: 10px; }
+          .ulist-search .search-input-wrap { margin: 0; }
+
+          .ucard-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; padding: 16px; }
+          .ucard {
+            background: #fafbff; border: 1px solid var(--gray-border); border-radius: 12px;
+            padding: 14px 16px; display: flex; align-items: flex-start; gap: 12px;
+            transition: all .15s;
+          }
+          .ucard:hover { box-shadow: 0 3px 12px rgba(0,0,0,.08); border-color: var(--blue-border); background: #fff; }
+          .ucard-av {
+            width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0;
+            background: linear-gradient(135deg, var(--blue-mid), var(--orange));
+            color: #fff; display: flex; align-items: center; justify-content: center;
+            font-size: .8rem; font-weight: 700;
+          }
+          .ucard-info { flex: 1; min-width: 0; }
+          .ucard-name { font-weight: 700; font-size: .88rem; color: var(--text-dark); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+          .ucard-email { font-size: .73rem; color: var(--gray-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
+          .ucard-meta { font-size: .7rem; color: var(--gray-text); margin-top: 4px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+          .ucard-role-badge {
+            padding: 2px 8px; border-radius: 20px; font-size: .67rem; font-weight: 700; text-transform: uppercase;
+          }
+          .ucard-actions { display: flex; flex-direction: column; gap: 4px; }
+          .ucard-btn { padding: 4px 10px; border: none; border-radius: 7px; font-size: .72rem; font-weight: 600; cursor: pointer; font-family: inherit; white-space: nowrap; }
+          .ucard-btn.blue  { background: var(--blue-soft); color: var(--blue-mid); }
+          .ucard-btn.red   { background: #fee2e2; color: #ef4444; }
+          .ucard-btn.blue:hover { background: var(--blue-mid); color: #fff; }
+          .ucard-btn.red:hover  { background: #ef4444; color: #fff; }
+
+          .ulist-empty { padding: 60px; text-align: center; color: var(--gray-text); }
+          .ulist-empty i { font-size: 2.5rem; opacity: .25; display: block; margin-bottom: 12px; }
+        </style>
+
+        <!-- 4 clickable role columns -->
+        <div class="users-cols-grid" id="users-cols-grid">
+          <div class="ucol-card active" onclick="filterUserCol('etudiant', this)" id="ucol-etudiant">
+            <div class="ucol-top">
+              <div class="ucol-icon" style="background:#dbeafe;color:#2952cc;"><i class="fas fa-user-graduate"></i></div>
+              <span class="ucol-count" id="ucol-count-etudiant">—</span>
+            </div>
+            <div class="ucol-label">Étudiants</div>
+            <div class="ucol-link"><i class="fas fa-arrow-right"></i> Voir les étudiants</div>
+          </div>
+          <div class="ucol-card" onclick="filterUserCol('prof', this)" id="ucol-prof">
+            <div class="ucol-top">
+              <div class="ucol-icon" style="background:#fef3c7;color:#d97706;"><i class="fas fa-chalkboard-user"></i></div>
+              <span class="ucol-count" id="ucol-count-prof">—</span>
+            </div>
+            <div class="ucol-label">Professeurs</div>
+            <div class="ucol-link"><i class="fas fa-arrow-right"></i> Voir les profs</div>
+          </div>
+          <div class="ucol-card" onclick="filterUserCol('technicien', this)" id="ucol-technicien">
+            <div class="ucol-top">
+              <div class="ucol-icon" style="background:#f3e8ff;color:#7c3aed;"><i class="fas fa-tools"></i></div>
+              <span class="ucol-count" id="ucol-count-technicien">—</span>
+            </div>
+            <div class="ucol-label">Techniciens</div>
+            <div class="ucol-link"><i class="fas fa-arrow-right"></i> Voir les techs</div>
+          </div>
+          <div class="ucol-card" onclick="filterUserCol('admin', this)" id="ucol-admin">
+            <div class="ucol-top">
+              <div class="ucol-icon" style="background:#dcfce7;color:#16a34a;"><i class="fas fa-shield-halved"></i></div>
+              <span class="ucol-count" id="ucol-count-admin">—</span>
+            </div>
+            <div class="ucol-label">Administrateurs</div>
+            <div class="ucol-link"><i class="fas fa-arrow-right"></i> Voir les admins</div>
+          </div>
+        </div>
+
+        <!-- User list -->
+        <div class="ulist-section">
+          <div class="ulist-header">
+            <h3 id="ulist-title"><i class="fas fa-user-graduate" style="color:var(--blue-mid);"></i> Étudiants</h3>
+            <div class="ulist-search" style="display:flex;align-items:center;gap:10px;">
+              <div class="search-input-wrap">
+                <i class="fas fa-search"></i>
+                <input type="text" id="search-user" placeholder="Rechercher..." oninput="renderUserCards()" />
+              </div>
+              <button onclick="openCreateUserModal()" style="display:flex;align-items:center;gap:6px;padding:8px 16px;background:linear-gradient(135deg,var(--blue-mid),var(--blue-light));color:#fff;border:none;border-radius:10px;font-family:inherit;font-size:.82rem;font-weight:700;cursor:pointer;white-space:nowrap;transition:filter .15s;" onmouseover="this.style.filter='brightness(.9)'" onmouseout="this.style.filter='brightness(1)'">
+                <i class="fas fa-plus"></i> Ajouter
+              </button>
+            </div>
+          </div>
+          <div class="ucard-grid" id="ucard-grid">
+            <div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--gray-text);">
+              <i class="fas fa-spinner fa-spin" style="font-size:1.5rem;"></i>
+              <p style="margin-top:12px;">Chargement...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ─────────────────────────────────────────────────────
+           PANEL: ÉTUDIANTS (accordion tree)
+           ───────────────────────────────────────────────────── -->
+      <div id="panel-etudiants" class="admin-panel">
+
+        <style>
+          /* ── Accordion tree (same as presence.html) ── */
+          .atree { display:flex; flex-direction:column; gap:8px; }
+          .agrade-row { background:#fff; border:1.5px solid var(--gray-border); border-radius:14px; overflow:hidden; }
+          .agrade-header {
+            display:flex; align-items:center; justify-content:space-between;
+            padding:15px 20px; cursor:pointer; user-select:none;
+            background:linear-gradient(135deg,var(--blue-soft) 0%,#fff 100%);
+            transition:background .15s;
+          }
+          .agrade-header.open { border-bottom:1.5px solid var(--gray-border); }
+          .agrade-title { display:flex; align-items:center; gap:12px; font-weight:700; font-size:.92rem; color:var(--text-dark); }
+          .agrade-icon  { width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:.95rem; flex-shrink:0; }
+          .agrade-count { font-size:.72rem; font-weight:600; color:var(--gray-text); background:var(--gray-border); padding:2px 10px; border-radius:20px; }
+          .achev { color:var(--gray-text); transition:transform .2s; font-size:.8rem; }
+          .achev.open { transform:rotate(180deg); }
+          .aniveau-list { padding:8px; display:none; flex-direction:column; gap:4px; background:var(--gray-bg); }
+          .aniveau-list.open { display:flex; }
+          .aniveau-row { background:#fff; border:1px solid var(--gray-border); border-radius:10px; overflow:hidden; }
+          .aniveau-header {
+            display:flex; align-items:center; justify-content:space-between;
+            padding:11px 16px; cursor:pointer; user-select:none; transition:background .15s;
+          }
+          .aniveau-header.open { background:var(--blue-soft); border-bottom:1px solid var(--gray-border); }
+          .aniveau-title { display:flex; align-items:center; gap:10px; font-weight:600; font-size:.85rem; color:var(--text-dark); }
+          .aniveau-badge { padding:2px 8px; border-radius:6px; font-size:.68rem; font-weight:700; background:var(--blue-tint); color:var(--blue-mid); }
+          .aclasse-list { padding:8px; display:none; flex-direction:column; gap:4px; }
+          .aclasse-list.open { display:flex; }
+          .aclasse-row {
+            display:flex; align-items:center; justify-content:space-between;
+            padding:10px 16px; border-radius:8px; cursor:pointer;
+            border:1px solid transparent; transition:all .15s; background:#fafbff;
+          }
+          .aclasse-row:hover { background:var(--blue-soft); border-color:var(--blue-border); }
+          .aclasse-row.aopen { background:var(--blue-mid); color:#fff; border-color:var(--blue-mid); }
+          .aclasse-row.aopen .aclasse-sub { color:rgba(255,255,255,.7); }
+          .aclasse-sub { font-size:.72rem; color:var(--gray-text); }
+          /* Students drawer inside admin */
+          .astudent-drawer {
+            display:none; border-top:1px solid var(--gray-border);
+            background:#f9faff; padding:16px;
+          }
+          .astudent-drawer.open { display:block; }
+          .astudent-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:10px; margin-top:12px; }
+          .astudent-card {
+            background:#fff; border-radius:10px; padding:12px 14px;
+            border:1px solid var(--gray-border); display:flex; align-items:center; gap:10px;
+          }
+          .astudent-av {
+            width:36px; height:36px; border-radius:50%; flex-shrink:0;
+            background:linear-gradient(135deg,var(--blue-mid),var(--orange));
+            color:#fff; display:flex; align-items:center; justify-content:center;
+            font-size:.78rem; font-weight:700;
+          }
+        </style>
+
+        <div class="atree" id="admin-class-tree">
+          <div style="text-align:center;padding:40px;color:var(--gray-text);">
+            <i class="fas fa-spinner fa-spin" style="font-size:1.5rem;"></i>
+            <p style="margin-top:12px;">Chargement...</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ─────────────────────────────────────────────────────
+           PANEL: NOUVEAUTÉS
+           ───────────────────────────────────────────────────── -->
+      <div id="panel-news" class="admin-panel">
+        <style>
+          .news-compose {
+            background:#fff; border-radius:16px; border:1.5px solid var(--gray-border);
+            padding:24px; margin-bottom:24px;
+          }
+          .news-compose h3 { font-size:1rem; font-weight:700; margin-bottom:16px; color:var(--text-dark); }
+          .news-list-admin { display:flex; flex-direction:column; gap:12px; }
+          .news-item-admin {
+            background:#fff; border-radius:12px; border:1px solid var(--gray-border);
+            padding:16px 20px; display:flex; align-items:flex-start; justify-content:space-between; gap:12px;
+          }
+          .news-item-admin:hover { box-shadow:0 2px 12px rgba(0,0,0,0.07); }
+          .news-cible-badge {
+            display:inline-flex;align-items:center;gap:5px;padding:2px 10px;border-radius:20px;
+            font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.4px;
+          }
+          .news-cible-badge.tous     { background:#eef2ff;color:var(--blue-mid); }
+          .news-cible-badge.etudiant { background:#dcfce7;color:var(--green-dark); }
+          .news-cible-badge.prof     { background:#fef3c7;color:var(--amber); }
+          .news-cible-badge.all      { background:#f3e8ff;color:var(--purple-dark); }
+          .btn-del-news { background:#fee2e2;color:#ef4444;border:none;border-radius:8px;padding:6px 12px;cursor:pointer;font-size:.78rem;font-weight:600;font-family:inherit;transition:all .15s; }
+          .btn-del-news:hover { background:#ef4444;color:#fff; }
+        </style>
+
+        <div class="news-compose">
+          <h3><i class="fas fa-pen" style="color:var(--blue-mid);margin-right:8px;"></i>Publier une nouvelle annonce</h3>
+
+          <div id="news-success-msg" style="display:none;background:#dcfce7;color:#16a34a;border:1px solid #bbf7d0;border-radius:10px;padding:10px 16px;font-size:.85rem;margin-bottom:14px;">
+            <i class="fas fa-check-circle"></i> Annonce publiée avec succès !
+          </div>
+
+          <div class="form-group" style="margin-bottom:14px;">
+            <label style="font-size:.8rem;font-weight:600;color:var(--gray-text);text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:6px;">Titre *</label>
+            <input type="text" id="news-titre" class="form-input" placeholder="Titre de l'annonce..." style="width:100%;" />
+          </div>
+
+          <div class="form-group" style="margin-bottom:14px;">
+            <label style="font-size:.8rem;font-weight:600;color:var(--gray-text);text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:6px;">Contenu *</label>
+            <textarea id="news-contenu" class="form-textarea" placeholder="Rédigez votre annonce ici..." style="width:100%;min-height:120px;"></textarea>
+          </div>
+
+          <div class="form-group" style="margin-bottom:20px;">
+            <label style="font-size:.8rem;font-weight:600;color:var(--gray-text);text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:8px;">Destinataires</label>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;">
+              <label class="news-target-opt" style="display:flex;align-items:center;gap:8px;padding:8px 16px;border-radius:10px;border:2px solid var(--gray-border);cursor:pointer;transition:all .15s;" onclick="setNewsTarget('tous', this)">
+                <input type="radio" name="news-cible" value="tous" checked style="display:none;" />
+                <i class="fas fa-users" style="color:var(--blue-mid);"></i>
+                <span style="font-size:.85rem;font-weight:600;">Général</span>
+              </label>
+              <label class="news-target-opt" style="display:flex;align-items:center;gap:8px;padding:8px 16px;border-radius:10px;border:2px solid var(--gray-border);cursor:pointer;transition:all .15s;" onclick="setNewsTarget('etudiant', this)">
+                <input type="radio" name="news-cible" value="etudiant" style="display:none;" />
+                <i class="fas fa-user-graduate" style="color:var(--green-dark);"></i>
+                <span style="font-size:.85rem;font-weight:600;">Étudiants</span>
+              </label>
+              <label class="news-target-opt" style="display:flex;align-items:center;gap:8px;padding:8px 16px;border-radius:10px;border:2px solid var(--gray-border);cursor:pointer;transition:all .15s;" onclick="setNewsTarget('prof', this)">
+                <input type="radio" name="news-cible" value="prof" style="display:none;" />
+                <i class="fas fa-chalkboard-user" style="color:var(--amber);"></i>
+                <span style="font-size:.85rem;font-weight:600;">Enseignants</span>
+              </label>
+              <label class="news-target-opt" style="display:flex;align-items:center;gap:8px;padding:8px 16px;border-radius:10px;border:2px solid var(--gray-border);cursor:pointer;transition:all .15s;" onclick="setNewsTarget('all', this)">
+                <input type="radio" name="news-cible" value="all" style="display:none;" />
+                <i class="fas fa-globe" style="color:var(--purple-dark);"></i>
+                <span style="font-size:.85rem;font-weight:600;">Tous</span>
+              </label>
+            </div>
+          </div>
+
+          <button onclick="publishNews()" style="background:linear-gradient(135deg,var(--blue-mid),var(--blue-light));color:#fff;border:none;border-radius:12px;padding:11px 24px;font-family:inherit;font-size:.9rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:8px;transition:filter .15s;" onmouseover="this.style.filter='brightness(.9)'" onmouseout="this.style.filter='brightness(1)'">
+            <i class="fas fa-paper-plane"></i> Publier l'annonce
+          </button>
+        </div>
+
+        <div class="card">
+          <h3 style="margin-bottom:16px;">Annonces publiées</h3>
+          <div class="news-list-admin" id="admin-news-list">
+            <div style="text-align:center;padding:40px;color:var(--gray-text);">
+              <i class="fas fa-spinner fa-spin" style="font-size:1.5rem;"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- end .content -->
+  </main>
+
+  <!-- ASSIGN MODAL -->
+  <div class="modal-overlay" id="assign-modal" style="display:none;" onclick="if(event.target===this)closeAssignModal()">
+    <div class="modal-content" style="max-width:500px;" onclick="event.stopPropagation()">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+        <h3><i class="fas fa-user-cog" style="color:var(--orange);margin-right:8px;"></i>Assigner à un technicien</h3>
+        <button onclick="closeAssignModal()" style="background:none;border:none;font-size:1.5rem;cursor:pointer;"><i class="fas fa-times"></i></button>
+      </div>
+      <p>Sélectionnez un technicien pour cette réclamation :</p>
+      <div id="techniciens-list" style="margin-top:16px;"></div>
+    </div>
+  </div>
+
+  <!-- CREATE USER MODAL -->
+  <div id="create-user-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9999;align-items:center;justify-content:center;" onclick="if(event.target===this)closeCreateUserModal()">
+    <div style="background:#fff;border-radius:20px;padding:28px;width:90%;max-width:500px;box-shadow:0 20px 60px rgba(0,0,0,.2);max-height:90vh;overflow-y:auto;" onclick="event.stopPropagation()">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--gray-border);">
+        <h3 style="font-size:1rem;font-weight:700;color:var(--text-dark);"><i class="fas fa-user-plus" style="color:var(--blue-mid);margin-right:8px;"></i>Ajouter un utilisateur</h3>
+        <button onclick="closeCreateUserModal()" style="background:none;border:none;font-size:1.4rem;cursor:pointer;color:var(--gray-text);"><i class="fas fa-times"></i></button>
+      </div>
+      <div id="cu-success" style="display:none;background:#dcfce7;color:#16a34a;border:1px solid #bbf7d0;border-radius:10px;padding:10px 16px;font-size:.85rem;margin-bottom:14px;"><i class="fas fa-check-circle"></i> Utilisateur créé avec succès !</div>
+      <div id="cu-error" style="display:none;background:#fef2f2;color:#ef4444;border:1px solid #fee2e2;border-radius:10px;padding:10px 16px;font-size:.85rem;margin-bottom:14px;"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;">
+        <div>
+          <label style="font-size:.78rem;font-weight:700;color:var(--gray-text);text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:6px;">Prénom *</label>
+          <input id="cu-prenom" type="text" class="form-input" placeholder="Prénom" style="width:100%;box-sizing:border-box;" />
+        </div>
+        <div>
+          <label style="font-size:.78rem;font-weight:700;color:var(--gray-text);text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:6px;">Nom *</label>
+          <input id="cu-nom" type="text" class="form-input" placeholder="Nom" style="width:100%;box-sizing:border-box;" />
+        </div>
+      </div>
+      <div style="margin-bottom:14px;">
+        <label style="font-size:.78rem;font-weight:700;color:var(--gray-text);text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:6px;">Email *</label>
+        <input id="cu-email" type="email" class="form-input" placeholder="email@exemple.com" style="width:100%;box-sizing:border-box;" />
+      </div>
+      <div style="margin-bottom:14px;">
+        <label style="font-size:.78rem;font-weight:700;color:var(--gray-text);text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:6px;">Mot de passe *</label>
+        <input id="cu-password" type="password" class="form-input" placeholder="••••••••" style="width:100%;box-sizing:border-box;" />
+      </div>
+      <div style="margin-bottom:20px;">
+        <label style="font-size:.78rem;font-weight:700;color:var(--gray-text);text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:8px;">Rôle *</label>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;" id="cu-role-btns">
+          <button class="cu-role-btn active" data-role="prof" onclick="setCuRole('prof',this)" style="display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:10px;border:2px solid var(--blue-mid);background:var(--blue-soft);font-family:inherit;font-size:.8rem;font-weight:600;cursor:pointer;color:var(--blue-mid);">
+            <i class="fas fa-chalkboard-user"></i> Professeur
+          </button>
+          <button class="cu-role-btn" data-role="technicien" onclick="setCuRole('technicien',this)" style="display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:10px;border:2px solid var(--gray-border);background:#fff;font-family:inherit;font-size:.8rem;font-weight:600;cursor:pointer;color:var(--gray-text);">
+            <i class="fas fa-tools"></i> Technicien
+          </button>
+          <button class="cu-role-btn" data-role="admin" onclick="setCuRole('admin',this)" style="display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:10px;border:2px solid var(--gray-border);background:#fff;font-family:inherit;font-size:.8rem;font-weight:600;cursor:pointer;color:var(--gray-text);">
+            <i class="fas fa-shield-halved"></i> Admin
+          </button>
+          <button class="cu-role-btn" data-role="etudiant" onclick="setCuRole('etudiant',this)" style="display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:10px;border:2px solid var(--gray-border);background:#fff;font-family:inherit;font-size:.8rem;font-weight:600;cursor:pointer;color:var(--gray-text);">
+            <i class="fas fa-user-graduate"></i> Étudiant
+          </button>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;">
+        <button id="cu-submit-btn" onclick="submitCreateUser()" style="flex:1;padding:11px;background:linear-gradient(135deg,var(--blue-mid),var(--blue-light));color:#fff;border:none;border-radius:12px;font-family:inherit;font-size:.9rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">
+          <i class="fas fa-user-plus"></i> Créer l'utilisateur
+        </button>
+        <button onclick="closeCreateUserModal()" style="padding:11px 20px;background:var(--gray-bg);color:var(--gray-text);border:none;border-radius:12px;font-family:inherit;font-size:.9rem;font-weight:600;cursor:pointer;">
+          Annuler
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <button class="help-btn" onclick="openHelpModal()"><i class="fas fa-question"></i></button>
+</body>
+<script src="app.js"></script>
+<script src="navbar.js"></script>
+<script>
+  // ── Tab switching ─────────────────────────────────────────
+  function switchAdminTab(panelId, btn, skipHash = false) {
+    document.querySelectorAll('.admin-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.admin-tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById(panelId).classList.add('active');
+    if (btn) btn.classList.add('active');
+    else document.querySelectorAll('.admin-tab-btn').forEach(b => { if (b.getAttribute('onclick')&&b.getAttribute('onclick').includes(panelId)) b.classList.add('active'); });
+
+    const hashMap = { 'panel-signalements':'', 'panel-users':'#users', 'panel-etudiants':'#etudiants', 'panel-news':'#news' };
+    const newHash = hashMap[panelId] ?? '';
+    if (!skipHash && newHash !== window.location.hash) history.replaceState(null, null, window.location.pathname + newHash);
+    if (typeof buildNav === 'function') buildNav(newHash);
+
+    if (panelId === 'panel-users'      && !window._usersLoaded)    { initAdminUsers();    window._usersLoaded    = true; }
+    if (panelId === 'panel-etudiants'  && !window._studentsLoaded) { loadAdminClassTree(); window._studentsLoaded = true; }
+    if (panelId === 'panel-news'       && !window._newsLoaded)     { loadAdminNews();      window._newsLoaded     = true; }
+  }
+
+  function handleHashChange() {
+    const hash = window.location.hash;
+    const map  = { '':'panel-signalements', '#users':'panel-users', '#etudiants':'panel-etudiants', '#news':'panel-news' };
+    const pid  = map[hash] || 'panel-signalements';
+    if (!document.getElementById(pid).classList.contains('active')) switchAdminTab(pid, null, true);
+  }
+  window.addEventListener('hashchange', handleHashChange);
+  window.addEventListener('popstate',   handleHashChange);
+  document.addEventListener('DOMContentLoaded', handleHashChange);
+
+  // ══════════════════════════════════════════════════════════
+  //  ADMIN UTILISATEURS — card layout
+  // ══════════════════════════════════════════════════════════
+  let allUsers = [];
+  let currentUserRole = 'etudiant';
+
+  const ROLE_BADGE = {
+    etudiant:   { bg:'#dbeafe', color:'#2952cc', label:'Étudiant',       icon:'fa-user-graduate'  },
+    prof:       { bg:'#fef3c7', color:'#d97706', label:'Professeur',      icon:'fa-chalkboard-user'},
+    technicien: { bg:'#f3e8ff', color:'#7c3aed', label:'Technicien',      icon:'fa-tools'          },
+    admin:      { bg:'#dcfce7', color:'#16a34a', label:'Administrateur',  icon:'fa-shield-halved'  },
+  };
+  const ULIST_TITLE = {
+    etudiant:'Étudiants', prof:'Professeurs', technicien:'Techniciens', admin:'Administrateurs'
+  };
+
+  async function initAdminUsers() {
+    try {
+      const res  = await fetch('api.php?action=get_users', { headers:{'X-User-Id': sessionStorage.getItem('user_id')||''} });
+      const data = await res.json();
+      if (data.success && Array.isArray(data.users)) {
+        allUsers = data.users;
+        // Update counts
+        ['etudiant','prof','technicien','admin'].forEach(role => {
+          const el = document.getElementById('ucol-count-'+role);
+          if (el) el.textContent = allUsers.filter(u => u.role === role).length;
+        });
+        renderUserCards();
+      } else {
+        document.getElementById('ucard-grid').innerHTML = '<div style="grid-column:1/-1;padding:40px;text-align:center;color:var(--gray-text);">Aucun utilisateur trouvé.</div>';
+      }
+    } catch(e) {
+      document.getElementById('ucard-grid').innerHTML = '<div style="grid-column:1/-1;padding:40px;text-align:center;color:red;">Erreur de chargement</div>';
+    }
+  }
+
+  function filterUserCol(role, card) {
+    currentUserRole = role;
+    document.querySelectorAll('.ucol-card').forEach(c => c.classList.remove('active'));
+    card.classList.add('active');
+    const titleEl = document.getElementById('ulist-title');
+    const rb = ROLE_BADGE[role];
+    if (titleEl) titleEl.innerHTML = `<i class="fas ${rb.icon}" style="color:${rb.color};"></i> ${ULIST_TITLE[role]}`;
+    renderUserCards();
+  }
+
+  function renderUserCards() {
+    const grid   = document.getElementById('ucard-grid');
+    const search = (document.getElementById('search-user')?.value || '').toLowerCase();
+    const users  = allUsers.filter(u => {
+      if (u.role !== currentUserRole) return false;
+      if (search && !`${u.prenom} ${u.nom} ${u.email}`.toLowerCase().includes(search)) return false;
+      return true;
+    });
+
+    if (!users.length) {
+      grid.innerHTML = `<div class="ulist-empty" style="grid-column:1/-1;"><i class="fas fa-users"></i><p>Aucun utilisateur trouvé</p></div>`;
+      return;
+    }
+
+    grid.innerHTML = '';
+    users.forEach(u => {
+      const rb       = ROLE_BADGE[u.role] || ROLE_BADGE.etudiant;
+      const initials = ((u.prenom||'?')[0]+(u.nom||'?')[0]).toUpperCase();
+      const card     = document.createElement('div');
+      card.className = 'ucard';
+      const presBtn  = (u.role === 'etudiant')
+        ? `<button class="ucard-btn blue" onclick="openStudentPresence(${u.id_user}, '${aEsc(u.prenom)} ${aEsc(u.nom)}')" style="margin-top:6px;">
+             <i class="fas fa-clipboard-check" style="margin-right:3px;"></i>Voir présence
+           </button>`
+        : '';
+      card.innerHTML = `
+        <div class="ucard-av">${initials}</div>
+        <div class="ucard-info">
+          <div class="ucard-name">${aEsc(u.prenom)} ${aEsc(u.nom)}</div>
+          <div class="ucard-email">${aEsc(u.email||'')}</div>
+          <div class="ucard-meta">
+            <span class="ucard-role-badge" style="background:${rb.bg};color:${rb.color};">
+              <i class="fas ${rb.icon}" style="margin-right:3px;"></i>${rb.label}
+            </span>
+            ${u.niveau ? `<span>${aEsc(u.niveau)}</span>` : ''}
+            ${u.td     ? `<span>${aEsc(u.td)}</span>` : ''}
+          </div>
+          ${presBtn}
+        </div>
+        <div class="ucard-actions">
+          <button class="ucard-btn red" onclick="deleteUser(${u.id_user}, this)"><i class="fas fa-trash"></i></button>
+        </div>`;
+      grid.appendChild(card);
+    });
+  }
+
+  async function deleteUser(id, btn) {
+    if (!confirm('Supprimer cet utilisateur ?')) return;
+    btn.disabled = true;
+    try {
+      const res  = await fetch('api.php?action=delete_user', {
+        method:'POST',
+        headers:{'Content-Type':'application/json','X-User-Id':sessionStorage.getItem('user_id')||''},
+        body: JSON.stringify({ id })
+      });
+      const data = await res.json();
+      if (data.success) { allUsers = allUsers.filter(u => u.id_user !== id); renderUserCards(); }
+      else { alert('Erreur: '+(data.error||'inconnue')); btn.disabled=false; }
+    } catch(e) { btn.disabled=false; }
+  }
+
+  // ══════════════════════════════════════════════════════════
+  //  STUDENT PRESENCE MODAL (from Étudiants panel)
+  // ══════════════════════════════════════════════════════════
+  function openStudentPresence(userId, userName) {
+    // Create or reuse modal
+    let modal = document.getElementById('student-presence-modal');
+    if (!modal) {
+      modal = document.createElement('div');
+      modal.id = 'student-presence-modal';
+      modal.className = 'modal-overlay';
+      modal.style.cssText = 'display:flex;z-index:9999;';
+      modal.innerHTML = `
+        <div class="modal-content" style="max-width:700px;max-height:90vh;overflow-y:auto;width:100%;" onclick="event.stopPropagation()">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--gray-border);">
+            <h3 id="sp-modal-title"><i class="fas fa-clipboard-check" style="color:var(--blue-mid);margin-right:8px;"></i>Présence</h3>
+            <button onclick="closeStudentPresenceModal()" style="background:none;border:none;font-size:1.5rem;cursor:pointer;color:var(--gray-text);"><i class="fas fa-times"></i></button>
+          </div>
+
+          <div style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap;align-items:center;">
+            <div style="display:flex;align-items:center;gap:8px;background:#fff;border:1.5px solid var(--gray-border);border-radius:10px;padding:8px 14px;">
+              <i class="fas fa-calendar-alt" style="color:var(--blue-mid);"></i>
+              <input type="date" id="sp-date-filter" style="border:none;outline:none;font-family:inherit;font-size:.85rem;font-weight:600;color:var(--text-dark);background:transparent;" />
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;background:#fff;border:1.5px solid var(--gray-border);border-radius:10px;padding:8px 14px;flex:1;min-width:140px;">
+              <i class="fas fa-book" style="color:var(--blue-mid);"></i>
+              <input type="text" id="sp-subject-filter" placeholder="Filtrer par matière / classe..." style="border:none;outline:none;font-family:inherit;font-size:.85rem;color:var(--text-dark);background:transparent;width:100%;" oninput="renderStudentPresenceRows()" />
+            </div>
+            <button onclick="loadStudentPresence()" style="padding:8px 16px;background:var(--blue-mid);color:#fff;border:none;border-radius:10px;font-family:inherit;font-size:.85rem;font-weight:600;cursor:pointer;">
+              <i class="fas fa-search"></i> Filtrer
+            </button>
+          </div>
+
+          <div id="sp-stats" style="display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap;"></div>
+          <div id="sp-body">
+            <div style="text-align:center;padding:40px;color:var(--gray-text);"><i class="fas fa-spinner fa-spin" style="font-size:1.5rem;"></i></div>
+          </div>
+        </div>`;
+      modal.addEventListener('click', function(e){ if(e.target===modal) closeStudentPresenceModal(); });
+      document.body.appendChild(modal);
+    }
+
+    document.getElementById('sp-modal-title').innerHTML = `<i class="fas fa-clipboard-check" style="color:var(--blue-mid);margin-right:8px;"></i>${aEsc(userName)}`;
+    modal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+
+    const dateEl = document.getElementById('sp-date-filter');
+    dateEl.value = '';
+    dateEl.removeEventListener('change', loadStudentPresence);
+    dateEl.addEventListener('change', loadStudentPresence);
+
+    window._spUserId   = userId;
+    window._spUserName = userName;
+    window._spRows     = [];
+    loadStudentPresence();
+  }
+
+  function closeStudentPresenceModal() {
+    const modal = document.getElementById('student-presence-modal');
+    if (modal) modal.style.display = 'none';
+    document.body.style.overflow = '';
+  }
+
+  async function loadStudentPresence() {
+    const body = document.getElementById('sp-body');
+    body.innerHTML = '<div style="text-align:center;padding:40px;color:var(--gray-text);"><i class="fas fa-spinner fa-spin" style="font-size:1.5rem;"></i><p style="margin-top:12px;">Chargement...</p></div>';
+    const dateFilter = document.getElementById('sp-date-filter')?.value || '';
+    try {
+      let url = `api.php?action=get_student_presence&user_id=${window._spUserId}`;
+      if (dateFilter) url += `&date=${dateFilter}`;
+      const res  = await fetch(url, { headers:{'X-User-Id': sessionStorage.getItem('user_id')||''} });
+      const data = await res.json();
+      if (data.success && Array.isArray(data.records)) {
+        window._spRows = data.records;
+        renderStudentPresenceRows();
+      } else {
+        body.innerHTML = '<div style="text-align:center;padding:40px;color:var(--gray-text);"><i class="fas fa-inbox" style="font-size:2rem;opacity:.3;display:block;margin-bottom:12px;"></i><p>Aucun enregistrement de présence.</p></div>';
+      }
+    } catch(e) {
+      body.innerHTML = '<div style="padding:20px;color:red;text-align:center;">Erreur de chargement</div>';
+    }
+  }
+
+  function renderStudentPresenceRows() {
+    const body    = document.getElementById('sp-body');
+    const stats   = document.getElementById('sp-stats');
+    const search  = (document.getElementById('sp-subject-filter')?.value || '').toLowerCase();
+    const rows    = (window._spRows || []).filter(r => {
+      if (!search) return true;
+      return (r.nom_classe||r.specialite||'').toLowerCase().includes(search);
+    });
+
+    const total   = rows.length;
+    const present = rows.filter(r => r.present == 1).length;
+    const absent  = total - present;
+    const pct     = total > 0 ? Math.round((present/total)*100) : 0;
+
+    stats.innerHTML = total === 0 ? '' : `
+      <div style="display:flex;align-items:center;gap:6px;padding:8px 14px;background:#dcfce7;border-radius:10px;font-size:.82rem;font-weight:700;color:#16a34a;">
+        <i class="fas fa-check-circle"></i> ${present} présence${present>1?'s':''}
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;padding:8px 14px;background:#fee2e2;border-radius:10px;font-size:.82rem;font-weight:700;color:#ef4444;">
+        <i class="fas fa-times-circle"></i> ${absent} absence${absent>1?'s':''}
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;padding:8px 14px;background:var(--blue-soft);border-radius:10px;font-size:.82rem;font-weight:700;color:var(--blue-mid);">
+        <i class="fas fa-percent"></i> Taux: <strong style="color:${pct>=75?'#16a34a':pct>=50?'#d97706':'#ef4444'};">${pct}%</strong>
+      </div>`;
+
+    if (!rows.length) {
+      body.innerHTML = '<div style="text-align:center;padding:40px;color:var(--gray-text);"><i class="fas fa-search" style="font-size:2rem;opacity:.3;display:block;margin-bottom:12px;"></i><p>Aucun résultat pour ce filtre.</p></div>';
+      return;
+    }
+
+    body.innerHTML = `
+      <div style="overflow-x:auto;">
+        <table style="width:100%;border-collapse:collapse;">
+          <thead>
+            <tr style="background:var(--gray-bg);">
+              <th style="padding:10px 14px;text-align:left;font-size:.73rem;font-weight:700;color:var(--gray-text);text-transform:uppercase;border-bottom:1px solid var(--gray-border);">Date</th>
+              <th style="padding:10px 14px;text-align:left;font-size:.73rem;font-weight:700;color:var(--gray-text);text-transform:uppercase;border-bottom:1px solid var(--gray-border);">Classe / Matière</th>
+              <th style="padding:10px 14px;text-align:center;font-size:.73rem;font-weight:700;color:var(--gray-text);text-transform:uppercase;border-bottom:1px solid var(--gray-border);">Statut</th>
+              <th style="padding:10px 14px;text-align:left;font-size:.73rem;font-weight:700;color:var(--gray-text);text-transform:uppercase;border-bottom:1px solid var(--gray-border);">Enregistré par</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rows.map(r => `
+              <tr style="border-bottom:1px solid var(--gray-border);">
+                <td style="padding:11px 14px;font-size:.83rem;color:var(--text-dark);">${formatSpDate(r.date_presence)}</td>
+                <td style="padding:11px 14px;">
+                  <div style="font-weight:600;font-size:.83rem;color:var(--text-dark);">${aEsc(r.nom_classe||'—')}</div>
+                  ${r.specialite ? `<div style="font-size:.72rem;color:var(--gray-text);">${aEsc(r.specialite)}</div>` : ''}
+                </td>
+                <td style="padding:11px 14px;text-align:center;">
+                  ${r.present == 1
+                    ? `<span style="display:inline-flex;align-items:center;gap:5px;padding:4px 12px;background:#dcfce7;color:#16a34a;border-radius:20px;font-size:.75rem;font-weight:700;"><i class="fas fa-check-circle"></i>Présent</span>`
+                    : `<span style="display:inline-flex;align-items:center;gap:5px;padding:4px 12px;background:#fee2e2;color:#ef4444;border-radius:20px;font-size:.75rem;font-weight:700;"><i class="fas fa-times-circle"></i>Absent</span>`
+                  }
+                </td>
+                <td style="padding:11px 14px;font-size:.8rem;color:var(--gray-text);">${aEsc(r.prof_prenom||'')} ${aEsc(r.prof_nom||'')}</td>
+              </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>`;
+  }
+
+  function formatSpDate(dt) {
+    if (!dt) return '—';
+    return new Date(dt+'T00:00:00').toLocaleDateString('fr-FR', { weekday:'short', day:'2-digit', month:'short', year:'numeric' });
+  }
+
+  // ══════════════════════════════════════════════════════════
+  //  ADMIN ÉTUDIANTS TREE
+  // ══════════════════════════════════════════════════════════
+  const AGRADE_COLORS = {
+    'Licence':     { bg:'#dbeafe', color:'#2952cc', icon:'fa-graduation-cap' },
+    'Master':      { bg:'#dcfce7', color:'#16a34a', icon:'fa-user-graduate'  },
+    'Ingénierie':  { bg:'#fef3c7', color:'#d97706', icon:'fa-cogs'           },
+    'Cycle Prépa': { bg:'#f3e8ff', color:'#7c3aed', icon:'fa-flask'          },
+  };
+
+  function aEsc(t) { if (!t) return ''; return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  function aInitials(p,n) { return ((p||'?')[0]+(n||'?')[0]).toUpperCase(); }
+
+  async function loadAdminClassTree() {
+    const tree = document.getElementById('admin-class-tree');
+    try {
+      const res  = await fetch('api.php?action=get_classes', { headers:{'X-User-Id':sessionStorage.getItem('user_id')||''} });
+      const data = await res.json();
+      if (!data.success || !data.classes.length) { tree.innerHTML = '<p style="color:var(--gray-text);padding:20px;text-align:center;">Aucune classe</p>'; return; }
+
+      const byGrade = {};
+      data.classes.forEach(c => {
+        if (!byGrade[c.grade]) byGrade[c.grade] = {};
+        if (!byGrade[c.grade][c.niveau]) byGrade[c.grade][c.niveau] = [];
+        byGrade[c.grade][c.niveau].push(c);
+      });
+
+      tree.innerHTML = '';
+      Object.entries(byGrade).forEach(([grade, niveaux]) => {
+        const gc  = AGRADE_COLORS[grade] || { bg:'#f3f4f6', color:'#6b7280', icon:'fa-book' };
+        const tot = Object.values(niveaux).flat().length;
+        const gradeEl = document.createElement('div');
+        gradeEl.className = 'agrade-row';
+        gradeEl.innerHTML = `
+          <div class="agrade-header" onclick="aToggleGrade(this)">
+            <div class="agrade-title">
+              <div class="agrade-icon" style="background:${gc.bg};color:${gc.color};"><i class="fas ${gc.icon}"></i></div>
+              ${aEsc(grade)}
+              <span class="agrade-count">${tot} classe${tot>1?'s':''}</span>
+            </div>
+            <i class="fas fa-chevron-down achev"></i>
+          </div>
+          <div class="aniveau-list">
+            ${Object.entries(niveaux).map(([niveau, classes]) => `
+              <div class="aniveau-row">
+                <div class="aniveau-header" onclick="aToggleNiveau(this)">
+                  <div class="aniveau-title">
+                    <span class="aniveau-badge">${aEsc(niveau)}</span>
+                    <span>${aEsc(grade)} – ${aEsc(niveau)}</span>
+                  </div>
+                  <div style="display:flex;align-items:center;gap:8px;">
+                    <span style="font-size:.72rem;color:var(--gray-text);">${classes.length} groupe${classes.length>1?'s':''}</span>
+                    <i class="fas fa-chevron-down achev" style="font-size:.75rem;"></i>
+                  </div>
+                </div>
+                <div class="aclasse-list">
+                  ${classes.map(cl => `
+                    <div>
+                      <div class="aclasse-row" id="acl-${cl.id_classe}" onclick="aToggleClass(${cl.id_classe}, this)">
+                        <div>
+                          <div style="font-weight:600;font-size:.85rem;">${aEsc(cl.nom_classe)}</div>
+                          <div class="aclasse-sub">${aEsc(cl.specialite)}</div>
+                        </div>
+                        <div style="display:flex;align-items:center;gap:8px;">
+                          <span style="font-size:.72rem;font-weight:600;color:var(--gray-text);background:var(--gray-border);padding:2px 8px;border-radius:20px;">
+                            <i class="fas fa-users" style="margin-right:3px;"></i>${cl.capacite}
+                          </span>
+                          <i class="fas fa-chevron-right" style="font-size:.72rem;color:var(--gray-text);transition:transform .2s;" id="achev-${cl.id_classe}"></i>
+                        </div>
+                      </div>
+                      <div class="astudent-drawer" id="adrawer-${cl.id_classe}">
+                        <div style="text-align:center;padding:20px;color:var(--gray-text);">
+                          <i class="fas fa-spinner fa-spin"></i>
+                        </div>
+                      </div>
+                    </div>`).join('')}
+                </div>
+              </div>`).join('')}
+          </div>`;
+        tree.appendChild(gradeEl);
+      });
+    } catch(e) { tree.innerHTML = '<p style="color:red;padding:20px;">Erreur de chargement</p>'; }
+  }
+
+  function aToggleGrade(header) {
+    const list = header.nextElementSibling;
+    const chev = header.querySelector('.achev');
+    const open = list.classList.toggle('open');
+    header.classList.toggle('open', open);
+    chev.classList.toggle('open', open);
+  }
+  function aToggleNiveau(header) {
+    const list = header.nextElementSibling;
+    const chev = header.querySelector('.achev');
+    const open = list.classList.toggle('open');
+    header.classList.toggle('open', open);
+    chev.classList.toggle('open', open);
+  }
+
+  async function aToggleClass(id, rowEl) {
+    const drawer = document.getElementById('adrawer-'+id);
+    const chev   = document.getElementById('achev-'+id);
+    const isOpen = drawer.classList.toggle('open');
+    rowEl.classList.toggle('aopen', isOpen);
+    if (chev) chev.style.transform = isOpen ? 'rotate(90deg)' : '';
+
+    if (!isOpen) return;
+    drawer.innerHTML = '<div style="text-align:center;padding:20px;color:var(--gray-text);"><i class="fas fa-spinner fa-spin"></i></div>';
+
+    try {
+      const res  = await fetch(`api.php?action=get_classe_students&id_classe=${id}&date=${new Date().toISOString().slice(0,10)}`, {
+        headers:{'X-User-Id':sessionStorage.getItem('user_id')||''}
+      });
+      const data = await res.json();
+      if (!data.success || !data.students.length) {
+        drawer.innerHTML = '<p style="color:var(--gray-text);padding:16px;font-size:.82rem;">Aucun étudiant dans cette classe.</p>';
+        return;
+      }
+      const cl = data.students;
+      drawer.innerHTML = `
+        <div style="font-size:.75rem;font-weight:700;color:var(--gray-text);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;">
+          ${cl.length} étudiant${cl.length>1?'s':''}
+        </div>
+        <div class="astudent-grid">
+          ${cl.map(s => `
+            <div class="astudent-card">
+              <div class="astudent-av">${aInitials(s.prenom, s.nom)}</div>
+              <div style="flex:1;min-width:0;">
+                <div style="font-weight:600;font-size:.82rem;">${aEsc(s.prenom)} ${aEsc(s.nom)}</div>
+                <div style="font-size:.72rem;color:var(--gray-text);">${aEsc(s.email||'')}</div>
+                <div style="font-size:.7rem;color:var(--gray-text);">${aEsc(s.niveau||'')} ${aEsc(s.td||'')}</div>
+                <button onclick="openStudentPresence(${s.id_user}, \`${aEsc(s.prenom)} ${aEsc(s.nom)}\`)" style="margin-top:6px;padding:4px 10px;background:var(--blue-soft);color:var(--blue-mid);border:none;border-radius:7px;font-size:.7rem;font-weight:700;cursor:pointer;font-family:inherit;" onmouseover="this.style.background='var(--blue-mid)';this.style.color='#fff'" onmouseout="this.style.background='var(--blue-soft)';this.style.color='var(--blue-mid)'">
+                  <i class="fas fa-clipboard-check" style="margin-right:4px;"></i>Voir présence
+                </button>
+              </div>
+            </div>`).join('')}
+        </div>`;
+    } catch(e) {
+      drawer.innerHTML = '<p style="color:red;padding:16px;font-size:.82rem;">Erreur de chargement</p>';
+    }
+  }
+
+  // ══════════════════════════════════════════════════════════
+  //  CREATE USER MODAL
+  // ══════════════════════════════════════════════════════════
+  let cuRole = 'prof';
+
+  function openCreateUserModal() {
+    document.getElementById('create-user-modal').style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+    document.getElementById('cu-success').style.display = 'none';
+    document.getElementById('cu-error').style.display = 'none';
+    document.getElementById('cu-prenom').value = '';
+    document.getElementById('cu-nom').value = '';
+    document.getElementById('cu-email').value = '';
+    document.getElementById('cu-password').value = '';
+    setCuRole('prof', document.querySelector('.cu-role-btn[data-role="prof"]'));
+  }
+
+  function closeCreateUserModal() {
+    document.getElementById('create-user-modal').style.display = 'none';
+    document.body.style.overflow = '';
+  }
+
+  function setCuRole(role, btn) {
+    cuRole = role;
+    document.querySelectorAll('.cu-role-btn').forEach(b => {
+      b.style.borderColor = 'var(--gray-border)';
+      b.style.background  = '#fff';
+      b.style.color       = 'var(--gray-text)';
+    });
+    if (btn) {
+      btn.style.borderColor = 'var(--blue-mid)';
+      btn.style.background  = 'var(--blue-soft)';
+      btn.style.color       = 'var(--blue-mid)';
+    }
+  }
+
+  async function submitCreateUser() {
+    const prenom   = document.getElementById('cu-prenom').value.trim();
+    const nom      = document.getElementById('cu-nom').value.trim();
+    const email    = document.getElementById('cu-email').value.trim();
+    const password = document.getElementById('cu-password').value.trim();
+    const errEl    = document.getElementById('cu-error');
+
+    if (!prenom || !nom || !email || !password) {
+      errEl.textContent = 'Tous les champs obligatoires doivent être remplis.';
+      errEl.style.display = 'block'; return;
+    }
+    errEl.style.display = 'none';
+
+    const btn = document.getElementById('cu-submit-btn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Création...';
+
+    try {
+      const res  = await fetch('api.php?action=create_user', {
+        method: 'POST',
+        headers: { 'Content-Type':'application/json', 'X-User-Id': sessionStorage.getItem('user_id')||'' },
+        body: JSON.stringify({ prenom, nom, email, password, role: cuRole })
+      });
+      const data = await res.json();
+      if (data.success) {
+        document.getElementById('cu-success').style.display = 'block';
+        // Refresh user list
+        window._usersLoaded = false;
+        initAdminUsers();
+        setTimeout(closeCreateUserModal, 1800);
+      } else {
+        errEl.textContent = 'Erreur : ' + (data.error || 'inconnue');
+        errEl.style.display = 'block';
+      }
+    } catch(e) {
+      errEl.textContent = 'Erreur réseau.';
+      errEl.style.display = 'block';
+    }
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fas fa-user-plus"></i> Créer l\'utilisateur';
+  }
+  let newsTarget = 'tous';
+
+  function setNewsTarget(val, label) {
+    newsTarget = val;
+    document.querySelectorAll('.news-target-opt').forEach(l => {
+      l.style.borderColor = 'var(--gray-border)';
+      l.style.background  = '#fff';
+    });
+    label.style.borderColor = 'var(--blue-mid)';
+    label.style.background  = 'var(--blue-soft)';
+  }
+  // Init first option style on load
+  document.addEventListener('DOMContentLoaded', () => {
+    const first = document.querySelector('.news-target-opt');
+    if (first) { first.style.borderColor='var(--blue-mid)'; first.style.background='var(--blue-soft)'; }
+  });
+
+  async function publishNews() {
+    const titre   = document.getElementById('news-titre').value.trim();
+    const contenu = document.getElementById('news-contenu').value.trim();
+    if (!titre || !contenu) { alert('Titre et contenu requis'); return; }
+
+    const res  = await fetch('api.php?action=publish_news', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','X-User-Id':sessionStorage.getItem('user_id')||''},
+      body: JSON.stringify({ titre, contenu, cible: newsTarget })
+    });
+    const data = await res.json();
+    if (data.success) {
+      document.getElementById('news-titre').value   = '';
+      document.getElementById('news-contenu').value = '';
+      const msg = document.getElementById('news-success-msg');
+      msg.style.display = 'block';
+      setTimeout(() => msg.style.display = 'none', 3000);
+      loadAdminNews();
+    } else {
+      alert('Erreur: ' + (data.error||'inconnue'));
+    }
+  }
+
+  async function loadAdminNews() {
+    const list = document.getElementById('admin-news-list');
+    list.innerHTML = '<div style="text-align:center;padding:32px;color:var(--gray-text);"><i class="fas fa-spinner fa-spin"></i></div>';
+    const res  = await fetch('api.php?action=get_news', { headers:{'X-User-Id':sessionStorage.getItem('user_id')||''} });
+    const data = await res.json();
+    if (!data.success || !data.news.length) {
+      list.innerHTML = '<p style="color:var(--gray-text);padding:20px;text-align:center;">Aucune annonce publiée.</p>';
+      return;
+    }
+    const LABELS = { tous:'Général', etudiant:'Étudiants', prof:'Enseignants', all:'Tous' };
+    list.innerHTML = '';
+    data.news.forEach(n => {
+      const item = document.createElement('div');
+      item.className = 'news-item-admin';
+      item.innerHTML = `
+        <div style="flex:1;min-width:0;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap;">
+            <span class="news-cible-badge ${n.cible}">${LABELS[n.cible]||n.cible}</span>
+            <span style="font-size:.72rem;color:var(--gray-text);">${new Date(n.created_at).toLocaleDateString('fr-FR',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'})}</span>
+          </div>
+          <div style="font-weight:700;font-size:.92rem;color:var(--text-dark);margin-bottom:4px;">${aEsc(n.titre)}</div>
+          <div style="font-size:.82rem;color:var(--gray-text);line-height:1.5;white-space:pre-line;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">${aEsc(n.contenu)}</div>
+        </div>
+        <button class="btn-del-news" onclick="deleteNews(${n.id_news}, this)" title="Supprimer">
+          <i class="fas fa-trash"></i>
+        </button>`;
+      list.appendChild(item);
+    });
+  }
+
+  async function deleteNews(id, btn) {
+    if (!confirm('Supprimer cette annonce ?')) return;
+    btn.disabled = true;
+    const res  = await fetch('api.php?action=delete_news', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','X-User-Id':sessionStorage.getItem('user_id')||''},
+      body: JSON.stringify({ id })
+    });
+    const data = await res.json();
+    if (data.success) loadAdminNews();
+    else { alert('Erreur'); btn.disabled=false; }
+  }
+</script>
+</body>
+</html>

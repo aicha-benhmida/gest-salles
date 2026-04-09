@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mes Interventions – Technicien – ISIMM Rooms</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link rel="stylesheet" href="style.css" />
+  <script src="navbar.js"></script>
+  <script src="app.js"></script>
+</head>
+<body class="dashboard-page">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="logo">
+        <img src="logo_isimm.jpg" alt="ISIMM Logo" />
+        <div class="logo-text">
+          <span class="logo-title" id="logo-title">ISIMM Rooms</span>
+          <span class="logo-subtitle" id="logo-subtitle">Espace</span>
+        </div>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <ul id="sidebar-nav-list"></ul>
+    </nav>
+    <div class="sidebar-footer">
+  <div class="user-profile" id="user-profile"></div>
+  <a href="login.html" class="logout-btn" onclick="sessionStorage.clear()">
+    <i class="fas fa-sign-out-alt"></i><span>Déconnexion</span>
+  </a>
+</div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main-content">
+    <header class="header">
+      <div class="header-title">
+        <h1>Mes <span>Interventions</span></h1>
+        <p>Gérez vos tâches de maintenance assignées</p>
+      </div>
+      <div class="header-actions">
+        <button class="notification-btn">
+          <i class="fas fa-bell"></i>
+          <span class="notification-badge" id="notif-count">0</span>
+        </button>
+        <button class="profile-btn"><i class="fas fa-user"></i></button>
+      </div>
+    </header>
+
+    <div class="content">
+
+      <!-- Stats -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-info">
+            <h3>Tâches assignées</h3>
+            <div class="stat-value" id="count-assigned">0</div>
+          </div>
+          <div class="stat-icon orange"><i class="fas fa-clock"></i></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-info">
+            <h3>À faire</h3>
+            <div class="stat-value" id="count-todo">0</div>
+          </div>
+          <div class="stat-icon yellow"><i class="fas fa-hourglass-start"></i></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-info">
+            <h3>En cours</h3>
+            <div class="stat-value" id="count-inprogress">0</div>
+          </div>
+          <div class="stat-icon blue"><i class="fas fa-wrench"></i></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-info">
+            <h3>Terminées</h3>
+            <div class="stat-value" id="count-done">0</div>
+          </div>
+          <div class="stat-icon green"><i class="fas fa-check-circle"></i></div>
+        </div>
+      </div>
+
+      <!-- Tasks -->
+      <div class="tasks-card">
+        <h2>Tâches en attente</h2>
+        <div id="tasks-container"></div>
+      </div>
+    </div>
+  </main>
+
+  <button class="help-btn" onclick="openHelpModal()"><i class="fas fa-question"></i></button>
+</body>
+</html>

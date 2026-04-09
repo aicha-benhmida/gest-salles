@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mes Réservations – ISIMM Rooms</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link rel="stylesheet" href="style.css" />
+  <script src="navbar.js"></script>
+  <script src="app.js"></script>
+</head>
+<body class="dashboard-page">
+
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="logo">
+        <img src="logo_isimm.jpg" alt="ISIMM Logo" />
+        <div class="logo-text">
+          <span class="logo-title" id="logo-title">ISIMM Rooms</span>
+          <span class="logo-subtitle" id="logo-subtitle">Espace</span>
+        </div>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <ul id="sidebar-nav-list"></ul>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-profile" id="user-profile"></div>
+      <a href="login.html" class="logout-btn" onclick="sessionStorage.clear()">
+        <i class="fas fa-sign-out-alt"></i><span>Déconnexion</span>
+      </a>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <header class="header">
+      <div class="header-title">
+        <h1>Mes <span>Réservations</span></h1>
+        <p>Consultez et gérez toutes vos réservations</p>
+      </div>
+      <div class="header-actions">
+        <button class="notification-btn"><i class="fas fa-bell"></i><span class="notification-badge" id="notif-count">0</span></button>
+        <a href="disponibilite.html" style="text-decoration:none;">
+          <button class="btn-primary-action" style="flex:unset; padding:10px 18px; font-size:.85rem;">
+            <i class="fas fa-plus"></i> Nouvelle
+          </button>
+        </a>
+      </div>
+    </header>
+
+    <div class="content">
+      <div class="filter-bar" style="margin-bottom:20px;">
+        <select class="form-select" id="filter-statut" onchange="filterRes()" style="max-width:200px;">
+          <option value="">Tous les statuts</option>
+          <option value="confirmee">Confirmée</option>
+          <option value="terminee">Terminée</option>
+          <option value="annulee">Annulée</option>
+        </select>
+        <div class="search-input-wrap">
+          <i class="fas fa-search"></i>
+          <input type="text" id="search-res" placeholder="Rechercher une salle..." oninput="filterRes()" />
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Toutes mes réservations</h3>
+        <div class="res-list" id="res-list">
+          <div style="text-align:center; padding:32px; color:var(--gray-text);">
+            <i class="fas fa-spinner fa-spin" style="font-size:1.5rem;"></i>
+            <p style="margin-top:12px;">Chargement...</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <button class="help-btn" onclick="openHelpModal()"><i class="fas fa-question"></i></button>
+
+</body>
+</html>

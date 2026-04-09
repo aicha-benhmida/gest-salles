@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Statistiques & IA – Admin – ISIMM Rooms</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link rel="stylesheet" href="style.css" />
+  <script src="navbar.js"></script>
+  <script src="app.js"></script>
+</head>
+<body class="dashboard-page">
+
+  <!-- SIDEBAR - STATIC ADMIN NAVIGATION -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="logo">
+        <img src="logo_isimm.jpg" alt="ISIMM Logo" />
+        <div class="logo-text">
+          <span class="logo-title" id="logo-title">ISIMM Rooms</span>
+          <span class="logo-subtitle" id="logo-subtitle">Espace</span>
+        </div>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <ul id="sidebar-nav-list"></ul>
+    </nav>
+    <div class="sidebar-footer">
+  <div class="user-profile" id="user-profile"></div>
+  <a href="login.html" class="logout-btn" onclick="sessionStorage.clear()">
+    <i class="fas fa-sign-out-alt"></i><span>Déconnexion</span>
+  </a>
+</div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main-content">
+    <header class="header">
+      <div class="header-title">
+        <h1>Statistiques <span>& IA</span></h1>
+        <p>Analyses et prédictions du système intelligent</p>
+      </div>
+      <div class="header-actions">
+        <button class="notification-btn"><i class="fas fa-bell"></i><span class="notification-badge" id="notif-count">0</span></button>
+        <button class="profile-btn"><i class="fas fa-user"></i></button>
+      </div>
+    </header>
+
+    <div class="content">
+
+      <!-- Stat cards -->
+      <div class="stats-grid" id="stats-grid">
+      </div>
+
+      <!-- Tabs -->
+      <div class="tabs-container">
+        <button class="tab-btn active" onclick="switchTab('occupation',this)">Occupation</button>
+        <button class="tab-btn" onclick="switchTab('signalements',this)">Signalements</button>
+        <button class="tab-btn" onclick="switchTab('heures',this)">Heures de pointe</button>
+      </div>
+
+      <!-- TAB: Occupation -->
+      <div id="occupation" class="tab-panel active">
+        <div class="chart-card full-width" id="occupation-chart">
+        </div>
+      </div>
+      <!-- TAB: Signalements -->
+      <div id="signalements" class="tab-panel">
+        <div class="chart-grid" id="signalements-grid">
+        </div>
+      </div>
+
+      <!-- TAB: Heures de pointe -->
+      <div id="heures" class="tab-panel">
+        <div class="chart-card full-width" id="heures-chart">
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <button class="help-btn" onclick="openHelpModal()"><i class="fas fa-question"></i></button>
+</body>
+</html>

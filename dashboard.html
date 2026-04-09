@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Salles – ISIMM Rooms</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link rel="stylesheet" href="style.css" />
+  <script src="navbar.js"></script>
+  <script src="app.js"></script>
+  <style>
+    .datepicker-wrap { position: relative; display: inline-block; }
+    .datepicker-trigger {
+      display: flex; align-items: center; gap: 8px;
+      background: var(--white); border: 1.5px solid var(--blue-mid);
+      border-radius: 10px; padding: 9px 14px; cursor: pointer;
+      font-size: .88rem; font-weight: 500; color: var(--blue-mid);
+      font-family: 'Poppins', sans-serif; white-space: nowrap;
+      transition: background .15s;
+    }
+    .datepicker-trigger:hover { background: var(--blue-soft); }
+    .datepicker-dropdown {
+      display: none; position: absolute; top: calc(100% + 8px); left: 0;
+      z-index: 999; background: var(--white); border-radius: 16px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.15); border: 1px solid var(--gray-border);
+      padding: 16px; width: 280px;
+    }
+    .datepicker-dropdown.open { display: block; }
+    .cal-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+    .cal-nav button {
+      background: var(--gray-light); border: none; border-radius: 7px;
+      width: 28px; height: 28px; cursor: pointer; color: var(--dark-text);
+      font-size: .8rem; display: flex; align-items: center; justify-content: center;
+      transition: background .15s;
+    }
+    .cal-nav button:hover { background: var(--blue-soft); color: var(--blue-mid); }
+    .cal-nav span { font-weight: 600; font-size: .88rem; color: var(--dark-text); }
+    .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
+    .cal-day-name {
+      text-align: center; font-size: .68rem; font-weight: 600;
+      color: var(--gray-text); padding: 2px 0 6px; text-transform: uppercase;
+    }
+    .cal-day {
+      text-align: center; padding: 6px 2px; border-radius: 7px;
+      font-size: .82rem; cursor: pointer; transition: all .12s;
+      color: var(--dark-text); border: 1.5px solid transparent;
+    }
+    .cal-day:hover:not(.empty):not(.past) { background: var(--blue-soft); color: var(--blue-mid); }
+    .cal-day.selected { background: var(--blue-mid); color: white; font-weight: 600; }
+    .cal-day.today { border-color: var(--blue-mid); font-weight: 600; }
+    .cal-day.past { color: var(--gray-text); cursor: default; opacity: .45; }
+    .cal-day.empty { cursor: default; }
+
+    /* Admin-only room controls — rendered by JS only for admin role */
+    .btn-room-edit   { flex: 1; padding: 7px; border: none; border-radius: 8px; font-family: inherit; font-size: .78rem; font-weight: 600; cursor: pointer; background: var(--blue-tint); color: var(--blue-mid); transition: all .2s; }
+    .btn-room-edit:hover { background: var(--blue-mid); color: var(--white); }
+    .btn-room-status { flex: 1; padding: 7px; border: none; border-radius: 8px; font-family: inherit; font-size: .78rem; font-weight: 600; cursor: pointer; background: var(--yellow-tint); color: var(--amber); transition: all .2s; }
+    .btn-room-status:hover { background: var(--amber); color: var(--white); }
+  </style>
+</head>
+<body class="dashboard-page">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="logo">
+        <img src="logo_isimm.jpg" alt="ISIMM Logo" />
+        <div class="logo-text">
+          <span class="logo-title" id="logo-title">ISIMM Rooms</span>
+          <span class="logo-subtitle" id="logo-subtitle">Espace</span>
+        </div>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <ul id="sidebar-nav-list"></ul>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-profile" id="user-profile"></div>
+      <a href="login.html" class="logout-btn" onclick="sessionStorage.clear()">
+        <i class="fas fa-sign-out-alt"></i><span>Déconnexion</span>
+      </a>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <header class="header">
+      <div class="header-title">
+        <h1 id="page-title">Disponibilité des <span>Salles</span></h1>
+        <p id="page-subtitle">Consultez et réservez les salles disponibles</p>
+      </div>
+      <div class="header-actions">
+        <button class="notification-btn">
+          <i class="fas fa-bell"></i>
+          <span class="notification-badge" id="notif-count">0</span>
+        </button>
+        <button class="profile-btn"><i class="fas fa-user"></i></button>
+      </div>
+    </header>
+
+    <div class="content">
+
+      <div class="filter-bar" style="flex-wrap:wrap;gap:10px;">
+        <div class="search-input-wrap">
+          <i class="fas fa-search"></i>
+          <input type="text" id="search-input" placeholder="Rechercher une salle..." oninput="filterRooms()" />
+        </div>
+        <select class="form-select" id="filter-type" onchange="filterRooms()" style="max-width:180px;">
+          <option value="">Tous les types</option>
+          <option value="cours">Cours</option>
+          <option value="tp">TP / Labo</option>
+          <option value="amphi">Amphithéâtre</option>
+        </select>
+        <select class="form-select" id="filter-etat" onchange="filterRooms()" style="max-width:200px;">
+          <option value="">Tous les états</option>
+          <option value="disponible">Disponible</option>
+          <option value="en_maintenance">En maintenance</option>
+          <option value="en panne">En panne</option>
+        </select>
+
+        <div class="datepicker-wrap" id="datepicker-wrap">
+          <button class="datepicker-trigger" onclick="toggleDatepicker(event)">
+            <i class="fas fa-calendar-alt"></i>
+            <span id="datepicker-label">Aujourd'hui</span>
+            <i class="fas fa-chevron-down" style="font-size:.7rem;opacity:.6;"></i>
+          </button>
+          <div class="datepicker-dropdown" id="datepicker-dropdown">
+            <div class="cal-nav">
+              <button onclick="changeMonth(-1)"><i class="fas fa-chevron-left"></i></button>
+              <span id="cal-month-label"></span>
+              <button onclick="changeMonth(1)"><i class="fas fa-chevron-right"></i></button>
+            </div>
+            <div class="cal-grid" id="calendar-grid"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="rooms-grid" id="rooms-grid">
+        <div style="grid-column:1/-1; text-align:center; padding:40px; color:var(--gray-text);">
+          <i class="fas fa-spinner fa-spin" style="font-size:2rem;"></i>
+          <p style="margin-top:12px;">Chargement des salles...</p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Reservation modal -->
+  <div class="modal-overlay" id="reservation-modal" style="display:none;" onclick="closeReservationModal(event)">
+    <div class="modal-content" style="max-width:600px;max-height:90vh;overflow-y:auto;" onclick="event.stopPropagation()">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--gray-border);">
+        <h3><i class="fas fa-calendar-plus" style="color:var(--blue-mid);margin-right:8px;"></i>Nouvelle Réservation</h3>
+        <button onclick="closeReservationModal()" style="background:none;border:none;font-size:1.5rem;cursor:pointer;color:var(--gray-text);"><i class="fas fa-times"></i></button>
+      </div>
+
+      <div id="modal-success-msg" style="display:none; background:#dcfce7; color:#16a34a; border:1px solid #bbf7d0; border-radius:10px; padding:12px 16px; font-size:.88rem; margin-bottom:16px;">
+        <i class="fas fa-check-circle"></i> Réservation confirmée avec succès !
+      </div>
+      <div id="modal-error-msg" style="display:none; background:#fef2f2; color:#ef4444; border:1px solid #fee2e2; border-radius:10px; padding:12px 16px; font-size:.88rem; margin-bottom:16px;"></div>
+
+      <div id="room-info-display" style="background:var(--gray-bg);padding:16px;border-radius:10px;margin-bottom:20px;"></div>
+
+      <div class="form-group">
+        <label for="modal-date">Date</label>
+        <input type="date" class="form-input" id="modal-date" />
+      </div>
+
+      <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+        <div class="form-group">
+          <label for="modal-heure-debut">Heure de début</label>
+          <select class="form-select" id="modal-heure-debut">
+            <option value="">Sélectionner</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="modal-heure-fin">Heure de fin</label>
+          <select class="form-select" id="modal-heure-fin">
+            <option value="">Sélectionner</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="modal-motif">Motif (optionnel)</label>
+        <textarea class="form-textarea" id="modal-motif" placeholder="Cours magistral, TP, Réunion..." style="min-height:80px;"></textarea>
+      </div>
+
+      <div style="display:flex;gap:12px;margin-top:24px;">
+        <button class="btn-primary-action" onclick="confirmerReservationModal()" style="flex:1;">
+          <i class="fas fa-calendar-check"></i> Confirmer
+        </button>
+        <button class="btn-secondary-action" onclick="closeReservationModal()" style="flex:unset;padding:10px 20px;">
+          Annuler
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <button class="help-btn" onclick="openHelpModal()"><i class="fas fa-question"></i></button>
+</body>
+</html>

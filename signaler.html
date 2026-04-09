@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Signaler un Problème – ISIMM Rooms</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link rel="stylesheet" href="style.css" />
+  <script src="navbar.js"></script>
+  <script src="app.js"></script>
+</head>
+<body class="dashboard-page">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="logo">
+        <img src="logo_isimm.jpg" alt="ISIMM Logo" />
+        <div class="logo-text">
+          <span class="logo-title" id="logo-title">ISIMM Rooms</span>
+          <span class="logo-subtitle" id="logo-subtitle">Espace</span>
+        </div>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <ul id="sidebar-nav-list"></ul>
+    </nav>
+    <div class="sidebar-footer">
+  <div class="user-profile" id="user-profile"></div>
+  <a href="login.html" class="logout-btn" onclick="sessionStorage.clear()">
+    <i class="fas fa-sign-out-alt"></i><span>Déconnexion</span>
+  </a>
+</div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main-content">
+    <header class="header">
+      <div class="header-title">
+        <h1>Signaler <span>un Problème</span></h1>
+        <p>Déclarez une panne ou anomalie dans une salle</p>
+      </div>
+      <div class="header-actions">
+        <button class="notification-btn"><i class="fas fa-bell"></i><span class="notification-badge" id="notif-count">0</span></button>
+        <button class="profile-btn"><i class="fas fa-user"></i></button>
+      </div>
+    </header>
+
+    <div class="content">
+      <!-- AI Banner -->
+      <div class="ai-banner">
+        <div class="ai-icon"><i class="fas fa-brain"></i></div>
+        <div class="ai-text">
+          <h4>Détection intelligente par IA</h4>
+          <p>Décrivez le problème et notre IA détectera automatiquement la catégorie.</p>
+        </div>
+      </div>
+
+      <div class="main-grid">
+        <!-- FORM -->
+        <div class="form-card" style="max-width: 800px; margin: 0 auto;">
+          <h2>Nouveau signalement</h2>
+          <p>Décrivez le problème rencontré et sélectionnez la salle concernée</p>
+
+          <div id="success-msg" style="display:none; background:#dcfce7; color:#16a34a; border:1px solid #bbf7d0;
+            border-radius:10px; padding:12px 16px; font-size:.88rem; margin-bottom:16px;">
+            <i class="fas fa-check-circle"></i> Signalement envoyé avec succès !
+          </div>
+          <div id="error-msg" style="display:none; background:#fef2f2; color:#ef4444; border:1px solid #fee2e2;
+            border-radius:10px; padding:12px 16px; font-size:.88rem; margin-bottom:16px;"></div>
+
+          <!-- AI Detected Category Display -->
+          <div id="ai-category-display" style="display:none; background:var(--blue-soft); border:1px solid var(--blue-border); 
+            border-radius:10px; padding:12px 16px; margin-bottom:16px;">
+            <div style="display:flex; align-items:center; gap:10px;">
+              <i class="fas fa-robot" style="color:var(--blue-mid);"></i>
+              <span style="font-weight:600; color:var(--blue-mid);">Catégorie détectée par IA:</span>
+              <span id="detected-category" style="font-weight:700; color:var(--text-dark);"></span>
+            </div>
+          </div>
+          
+
+          <div class="form-group">
+            <label>Salle concernée <span style="color:var(--red);">*</span></label>
+            <select class="form-select" id="salle-select">
+              <option value="">Sélectionner une salle...</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Description du problème <span style="color:var(--red);">*</span></label>
+            <textarea class="form-textarea" id="description" placeholder="Décrivez en détail le problème rencontré... (ex: Le projecteur ne s'allume plus depuis ce matin)" 
+              style="min-height:150px;" oninput="detectCategory(this.value)"></textarea>
+            <p class="field-hint">Plus vous décrivez précisément le problème, mieux l'IA pourra le classifier</p>
+          </div>
+
+          <div class="form-actions">
+            <button class="btn-primary-action" onclick="envoyerSignalement()">
+              <i class="fas fa-paper-plane"></i> Envoyer le signalement
+            </button>
+            <button class="btn-secondary-action" onclick="resetSignalement()">Annuler</button>
+          </div>
+        </div>
+
+        <!-- RIGHT PANEL -->
+                <!-- RIGHT PANEL -->
+        <div class="sidebar-cards">
+          
+          <!-- Dynamic Statistics -->
+          <div class="info-card">
+            <h3>Statistiques</h3>
+            <div id="stats-container">
+              <div style="text-align:center;padding:20px;color:var(--gray-text);">
+                <i class="fas fa-spinner fa-spin"></i>
+              </div>
+            </div>
+          </div>
+
+          <!-- Dynamic Recent Reports -->
+          <div class="info-card">
+            <h3>Signalements récents</h3>
+            <div class="report-list" id="recent-reports">
+              <div style="text-align:center;padding:20px;color:var(--gray-text);">
+                <i class="fas fa-spinner fa-spin"></i>
+              </div>
+            </div>
+          </div>
+
+          <!-- Static Tips (these are generic, can stay) -->
+          <div class="info-card tips-card">
+            <h3><i class="fas fa-lightbulb"></i> Conseils</h3>
+            <ul class="tips-list">
+              <li>Vérifiez que l'équipement est bien branché</li>
+              <li>Décrivez le problème avec précision</li>
+              <li>Mentionnez depuis quand le problème existe</li>
+              <li>Un signalement précis = une résolution plus rapide</li>
+            </ul>
+          </div>
+          
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <button class="help-btn" onclick="openHelpModal()"><i class="fas fa-question"></i></button>
+</body>
+</html>
